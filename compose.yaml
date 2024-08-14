@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    command: flask run --host=0.0.0.0
+    volumes:
+      - .:/code
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: recipe_db
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+
+volumes:
+  postgres_data:

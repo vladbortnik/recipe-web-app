@@ -3,6 +3,9 @@
 .AppleDouble
 .LSOverride
 
+# Personal folders
+.info/
+
 # macOS metadata files
 ._*
 
