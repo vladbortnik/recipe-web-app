@@ -1,4 +1,4 @@
-import os
+from flask_session import Session
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +8,7 @@ load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
+sess = Session()
 
 def create_app():
     app = Flask(__name__)
@@ -15,6 +16,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    sess.init_app(app)
 
     from .auth import auth_bp
     from .main import main_bp

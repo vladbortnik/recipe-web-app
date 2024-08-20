@@ -11,3 +11,7 @@ psycopg2-binary==2.9.9
 google-auth==2.33.0
 google-auth-oauthlib==1.2.1
 google-auth-httplib2==0.2.0
+Flask_Session==0.8.0
+itsdangerous==2.2.0
+twilio==9.2.3
+# vonage==3.16.1
