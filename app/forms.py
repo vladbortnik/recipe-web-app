@@ -9,15 +9,15 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class SignupForm(FlaskForm):
-    email = StringField('Email', validators=[Email()])
-    phone_number = StringField('Phone Number', validators=[Length(min=10, max=15)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    email = StringField('Email: ', validators=[DataRequired(), Email()])
+    phone_number = StringField('Phone Number: ', validators=[Length(min=10, max=15)])
+    password = PasswordField('Password: ', validators=[DataRequired(), Length(min=6, max=29)])
+    confirm_password = PasswordField('Confirm Password: ', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
 class ResetPasswordRequestForm(FlaskForm):
-    email = StringField('Email', validators=[Email()])
-    phone_number = StringField('Phone Number', validators=[Length(min=10, max=15)])
+    email = StringField('Email: ', validators=[DataRequired(), Email()])
+    phone_number = StringField('Phone Number: ', validators=[Length(min=10, max=15)])
     submit = SubmitField('Send Reset Link')
 
 class ResetPasswordForm(FlaskForm):

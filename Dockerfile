@@ -8,16 +8,15 @@ ENV PYTHONUNBUFFERED 1
 # Create working directory
 WORKDIR /code
 
+# Copy the current directory . in the project to the workdir . in the image
+COPY . .
+
 # Update the package list and install netcat
 RUN apt-get update && apt-get install -y -f netcat-openbsd
 
 # Install dependencies
-COPY requirements.txt /code/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
-COPY . /code/
 
 EXPOSE 5001
 

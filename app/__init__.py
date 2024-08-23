@@ -1,38 +1,49 @@
-from flask import Flask
-# from .extensions import db, migrate, sess
-from flask_wtf.csrf import CSRFProtect
+from flask import Flask, render_template, redirect, flash, url_for, request, abort
 from dotenv import load_dotenv
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_session import Session
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
+### from flask_session import Session
+### from flask_wtf.csrf import CSRFProtect
 
+# Load environment variables from .env file
 load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
-sess = Session()
+# bcrypt = Bcrypt()
+# login_manager = LoginManager()
+### sess = Session()
 
 def create_app():
-    # Load environment variables from .env file
-    # load_dotenv()
-    
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
 
     db.init_app(app)
     migrate.init_app(app, db)
-    sess.init_app(app)
+    # bcrypt.init_app(app)
+    # login_manager.init_app(app)
+    ### sess.init_app(app)
     
-    csrf = CSRFProtect(app)  # Initialize CSRF protection
+    ### csrf = CSRFProtect(app)  # Initialize CSRF protection
 
-    from .main import main_bp
-    from .auth import auth_bp
-    # from .main import main_bp
-    from .api import api_bp
+    # login_manager.login_view = "logIn"
+    # login_manager.login_message_category = "info"
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(main_bp)
-    app.register_blueprint(api_bp, url_prefix='/api')
+    # from .models import User
+
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     return User.query.get(int(user_id))
+
+    # @app.route('/')
+    # def home():
+    #     return "Hello, World!"
+
+    with app.app_context():
+        # Import routes
+        from . import routes
 
     return app

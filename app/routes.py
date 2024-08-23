@@ -1,14 +1,16 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask import current_app as app
+from flask import request, render_template, redirect, url_for, flash
+from flask_login import login_user
 from random import randint
-from ..models import User
 from .forms import LoginForm, SignupForm, ResetPasswordRequestForm, ResetPasswordForm
-# from ..extensions import db
-from .. import db
+from . import db
+from .models import User
 
-from . import auth_bp
-# auth_bp = Blueprint('auth', __name__)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -24,16 +26,16 @@ def login():
 
         if user and user.check_password(password):
             if user.confirmed:
-                # Log in user (implement session management)
-                return redirect(url_for('main.index'))
+                login_user(user)
+                return redirect(url_for('index'))
             else:
                 flash('Account not confirmed. Check your email/SMS for the confirmation code.', 'warning')
         else:
             flash('Invalid email/phone number or password', 'danger')
     return render_template('login.html', form=form)
 
-@auth_bp.route('/signup', methods=['GET', 'POST'])
-def signup():
+@app.route('/register', methods=['GET', 'POST'])
+def register():
     form = SignupForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -52,12 +54,15 @@ def signup():
             db.session.add(user)
             db.session.commit()
 
-            user.send_confirmation_code()
-            flash('User registered, please verify your account', 'success')
-            return redirect(url_for('auth.login'))
-    return render_template('signup.html', form=form)
+            try:
+                user.send_confirmation_code()
+                flash('User registered, please verify your account', 'success')
+            except Exception as e:
+                flash(f'Error sending confirmation code: {e}', 'danger')
+            return redirect(url_for('login'))
+    return render_template('register.html', form=form)
 
-@auth_bp.route('/reset_password_request', methods=['GET', 'POST'])
+@app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
@@ -72,18 +77,21 @@ def reset_password_request():
 
         if user:
             reset_token = user.generate_reset_token()
-            if email:
-                # Send email with reset token
-                pass
-            elif phone_number:
-                # Send SMS with reset token using Twilio
-                pass
-            flash('Password reset request processed, check your email or SMS for reset instructions', 'success')
+            try:
+                if email:
+                    # Send email with reset token
+                    user._send_email()  # Replace with actual email sending logic to include reset_token
+                elif phone_number:
+                    # Send SMS with reset token
+                    user._send_sms()  # Replace with actual SMS sending logic to include reset_token
+                flash('Password reset request processed, check your email or SMS for reset instructions', 'success')
+            except Exception as e:
+                flash(f'Error sending reset instructions: {e}', 'danger')
         else:
             flash('User not found', 'danger')
     return render_template('reset_password_request.html', form=form)
 
-@auth_bp.route('/reset_password', methods=['GET', 'POST'])
+@app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -97,5 +105,5 @@ def reset_password():
             user.set_password(new_password)
             db.session.commit()
             flash('Password has been reset', 'success')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
