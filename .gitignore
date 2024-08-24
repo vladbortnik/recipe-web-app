@@ -9,11 +9,9 @@
 # macOS metadata files
 ._*
 
-#Docker
-.dockerignore
-
-# Alembic
-migrations
+# Docker Specific
+# Normally, you don't want to include the .dockerignore
+# .dockerignore
 
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
@@ -30,6 +28,10 @@ migrations
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# flask-migrate/Alembic
+# Do not include it (unless you have a good reason)
+# migrations
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -92,10 +94,15 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask specific:
 instance/
 .webassets-cache
+*.db
+*.sqlite3
 flask_session
+
+# Logs
+*.log
 
 # Scrapy stuff:
 .scrapy

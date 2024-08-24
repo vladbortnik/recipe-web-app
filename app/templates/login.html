@@ -1,20 +1,28 @@
 {% extends "layout.html" %}
+
+{% block title %} Login | Recipes {% endblock %}
+
 {% block content %}
 <div class="container mt-5">
-    <h2>Login</h2>
+    <h2>LogIn</h2>
     <form method="POST" action="{{ url_for('login') }}">
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.email.label }} {{ form.email(class="form-control") }}
         </div>
         <div class="form-group">
-            {{ form.phone_number.label }} {{ form.phone_number(class="form-control") }}
-        </div>
-        <div class="form-group">
             {{ form.password.label }} {{ form.password(class="form-control") }}
+        </div>
+        <div class="form-check">
+            {{ form.remember(class="form-check-input") }} {{ form.remember.label(class="form-check-label") }}
         </div>
         <div class="form-group">
             {{ form.submit(class="btn btn-primary") }}
+        </div>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Not yet registered? <a href="{{ url_for('signup') }}">Sign Up</a>
+            </small>
         </div>
     </form>
 </div>
