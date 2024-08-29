@@ -1,12 +1,11 @@
 from flask import current_app as app
 from flask import request, render_template, redirect, url_for, flash
 from flask_login import login_user, current_user, logout_user, login_required
-# from random import randint
-from .forms import LoginForm, SignupForm
-# from .forms import ResetPasswordRequestForm, ResetPasswordForm
-# from app import bcrypt  # WRONG
+from .forms import LoginForm, SignupForm, UploadImageForm
 from . import db, bcrypt, login_manager # Import 'db & bcrypt' from the app package
-from .models import User
+from .models import User, Recipe, ImageSet, Product, RecipeProduct
+import uuid, os
+from .utils import process_images
 
 @app.route('/')
 def index():
@@ -22,32 +21,11 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            flash('You have been logged in', 'success')
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Login failed. Please check email and password.', 'danger')
-
-    
-    # form = LoginForm()
-    # if form.validate_on_submit():
-    #     email = form.email.data
-    #     phone_number = form.phone_number.data
-    #     password = form.password.data
-    #     user = None
-
-    #     if email:
-    #         user = User.query.filter_by(email=email).first()
-    #     elif phone_number:
-    #         user = User.query.filter_by(phone_number=phone_number).first()
-
-    #     if user and user.check_password(password):
-    #         if user.confirmed:
-    #             login_user(user)
-    #             return redirect(url_for('index'))
-    #         else:
-    #             flash('Account not confirmed. Check your email/SMS for the confirmation code.', 'warning')
-    #     else:
-    #         flash('Invalid email/phone number or password', 'danger')
     return render_template('login.html', form=form)
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -68,80 +46,126 @@ def signup():
             db.session.commit()
             flash('Your account has been created successfully.', 'success')
             return redirect(url_for('login'))
-            
-    # form = SignupForm()
-    # if form.validate_on_submit():
-    #     email = form.email.data
-    #     phone_number = form.phone_number.data
-    #     password = form.password.data
-
-    #     if email and User.query.filter_by(email=email).first():
-    #         flash('Email already registered', 'danger')
-    #     elif phone_number and User.query.filter_by(phone_number=phone_number).first():
-    #         flash('Phone number already registered', 'danger')
-    #     else:
-    #         user = User(email=email, phone_number=phone_number)
-    #         user.set_password(password)
-    #         user.confirmation_code = str(randint(100000, 999999))
-
-    #         db.session.add(user)
-    #         db.session.commit()
-
-    #         try:
-    #             user.send_confirmation_code()
-    #             flash('User registered, please verify your account', 'success')
-    #         except Exception as e:
-    #             flash(f'Error sending confirmation code: {e}', 'danger')
-    #         return redirect(url_for('logIn'))
     return render_template('signup.html', form=form)
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
+    flash('You have been logged out', 'success')
     return redirect(url_for('index'))
 
-# @app.route('/reset_password_request', methods=['GET', 'POST'])
-# def reset_password_request():
-#     form = ResetPasswordRequestForm()
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     return render_template('dashboard.html')
+
+# @app.route('/upload')
+# @login_required
+# def upload():
+#     return render_template('upload.html')
+
+
+# Ensure your upload folder is configured
+# app.config['UPLOAD_FOLDER'] = 'path/to/upload/folder'
+
+# @app.route('/upload', methods=['GET', 'POST'])
+# @login_required
+# def upload():
+#     form = UploadImageForm()
 #     if form.validate_on_submit():
-#         email = form.email.data
-#         phone_number = form.phone_number.data
-
-#         user = None
-#         if email:
-#             user = User.query.filter_by(email=email).first()
-#         elif phone_number:
-#             user = User.query.filter_by(phone_number=phone_number).first()
-
-#         if user:
-#             reset_token = user.generate_reset_token()
-#             try:
-#                 if email:
-#                     # Send email with reset token
-#                     user._send_email()  # Replace with actual email sending logic to include reset_token
-#                 elif phone_number:
-#                     # Send SMS with reset token
-#                     user._send_sms()  # Replace with actual SMS sending logic to include reset_token
-#                 flash('Password reset request processed, check your email or SMS for reset instructions', 'success')
-#             except Exception as e:
-#                 flash(f'Error sending reset instructions: {e}', 'danger')
-#         else:
-#             flash('User not found', 'danger')
-#     return render_template('reset_password_request.html', form=form)
-
-# @app.route('/reset_password', methods=['GET', 'POST'])
-# def reset_password():
-#     form = ResetPasswordForm()
-#     if form.validate_on_submit():
-#         reset_token = form.reset_token.data
-#         new_password = form.new_password.data
-
-#         user = User.verify_reset_token(reset_token)
-#         if not user:
-#             flash('Invalid or expired reset token', 'danger')
-#         else:
-#             user.set_password(new_password)
+#         if form.images.data:
+#             filename = secure_filename(form.images.data.filename)
+#             folder_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), filename)
+#             os.makedirs(os.path.dirname(folder_path), exist_ok=True)
+#             form.images.data.save(folder_path)
+            
+#             imageset = ImageSet(user_id=current_user.id, folder_path=folder_path, file_path=folder_path)
+#             db.session.add(imageset)
 #             db.session.commit()
-#             flash('Password has been reset', 'success')
-#             return redirect(url_for('logIn'))
-#     return render_template('reset_password.html', form=form)
+            
+#             # After saving, you may want to process the images and generate recipes
+
+#             flash('Images uploaded successfully', 'success')
+#             return redirect(url_for('dashboard'))
+    
+#     return render_template('upload.html', form=form)
+
+# # routes.py (additions)
+# from flask import current_app as app
+# import uuid
+
+
+# @app.route('/upload', methods=['GET', 'POST'])
+# @login_required
+# def upload():
+#     form = UploadImageForm()
+#     if form.validate_on_submit():
+#         if form.images.data:
+#             filename = f"{uuid.uuid4()}_{form.images.data.filename}"
+#             user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
+#             os.makedirs(user_folder, exist_ok=True)
+#             file_path = os.path.join(user_folder, filename)
+#             form.images.data.save(file_path)
+            
+#             imageset = ImageSet(user_id=current_user.id, folder_path=user_folder, file_path=file_path)
+#             db.session.add(imageset)
+#             db.session.commit()
+            
+#             # Process images and generate recipes if needed
+#             process_images(file_path)  # Assuming function exists in utils.py
+
+#             flash('Images uploaded successfully', 'success')
+#             return redirect(url_for('dashboard'))
+    
+#     return render_template('upload.html', form=form)
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    form = UploadImageForm()
+    if form.validate_on_submit():
+        if form.images.data:
+            # Create a unique folder for this upload
+            unique_folder = str(uuid.uuid4())
+            user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), unique_folder)
+            os.makedirs(user_folder, exist_ok=True)
+
+            for file in form.images.data:
+                filename = f"{uuid.uuid4()}_{file.filename}"
+                file_path = os.path.join(user_folder, filename)
+                file.save(file_path)
+
+                imageset = ImageSet(user_id=current_user.id, folder_path=user_folder, file_path=file_path, unique_folder=unique_folder)
+                db.session.add(imageset)
+            db.session.commit()
+
+            # Process images and generate recipes if needed
+            process_images(user_folder)  # Assuming function exists in utils.py
+
+            flash('Images uploaded successfully', 'success')
+            return redirect(url_for('dashboard'))
+
+    return render_template('upload.html', form=form)
+
+
+
+# @app.route('/dashboard', methods=['GET'])
+# @login_required
+# def dashboard():
+#     image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
+#     return render_template('dashboard.html', image_sets=image_sets)
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
+    # Group images by unique_folder
+    grouped_image_sets = {}
+    for image_set in image_sets:
+        if image_set.unique_folder not in grouped_image_sets:
+            grouped_image_sets[image_set.unique_folder] = []
+        grouped_image_sets[image_set.unique_folder].append(image_set)
+    
+    return render_template('dashboard.html', grouped_image_sets=grouped_image_sets)

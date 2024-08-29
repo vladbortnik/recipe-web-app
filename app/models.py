@@ -1,78 +1,69 @@
-# from datetime import datetime, timezone
-# from werkzeug.security import generate_password_hash, check_password_hash
-# from flask import current_app
 from flask_login import UserMixin
-# from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 from . import db
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
-
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(70), unique=True, nullable=False)
-    # phone_number = db.Column(db.String(20), unique=True, nullable=True)
     password = db.Column(db.String(256), nullable=False)
-    # confirmed = db.Column(db.Boolean, default=False)
-    # confirmation_code = db.Column(db.String(6), nullable=True)
-    # created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f'<User {self.email}>'
 
-    # def set_password(self, password):
-    #     self.password_hash = generate_password_hash(password)
+class ImageSet(db.Model):
+    __tablename__ = 'imagesets'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    folder_path = db.Column(db.String(255), nullable=False)
+    unique_folder = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)
 
-    # def check_password(self, password):
-    #     return check_password_hash(self.password_hash, password)
+    user = db.relationship('User', backref=db.backref('imagesets', lazy=True))
 
-    # def generate_confirmation_token(self, expiration=3600):
-    #     s = Serializer(current_app.config['SECRET_KEY'], expiration)
-    #     return s.dumps({'confirm': self.id}).decode('utf-8')
 
-    # def confirm(self, token):
-    #     s = Serializer(current_app.config['SECRET_KEY'])
-    #     try:
-    #         data = s.loads(token.encode('utf-8'))
-    #     except Exception as e:
-    #         print(f"Confirmation error: {e}")
-    #         return False
-    #     if data.get('confirm') != self.id:
-    #         return False
-    #     self.confirmed = True
-    #     db.session.add(self)
-    #     db.session.commit()
-    #     return True
 
-    # def send_confirmation_code(self):
-    #     # Dummy function for sending an email/SMS
-    #     try:
-    #         if self.email:
-    #             self._send_email()
-    #         elif self.phone_number:
-    #             self._send_sms()
-    #     except Exception as e:
-    #         print(f"Error sending confirmation code: {e}")
 
-    # def _send_email(self):
-    #     # Implement sending email using SendGrid or another email service
-    #     print(f"Sending confirmation email to {self.email}")
-    #     # Replace with actual email sending logic
+# class User(db.Model, UserMixin):
+#     __tablename__ = 'users'
+#     id = db.Column(db.Integer, primary_key=True)
+#     email = db.Column(db.String(70), unique=True, nullable=False)
+#     password = db.Column(db.String(256), nullable=False)
 
-    # def _send_sms(self):
-    #     # Implement sending SMS using Twilio or another SMS service
-    #     print(f"Sending confirmation SMS to {self.phone_number}")
-    #     # Replace with actual SMS sending logic
+#     def __repr__(self):
+#         return f'<User {self.email}>'
 
-    # def generate_reset_token(self, expiration=3600):
-    #     s = Serializer(current_app.config['SECRET_KEY'], expiration)
-    #     return s.dumps({'reset': self.id}).decode('utf-8')
+# # models.py (additions)
 
-    # @staticmethod
-    # def verify_reset_token(token):
-    #     s = Serializer(current_app.config['SECRET_KEY'])
-    #     try:
-    #         data = s.loads(token.encode('utf-8'))
-    #     except Exception as e:
-    #         print(f"Reset token error: {e}")
-    #         return None
-    #     return User.query.get(data['reset'])
+# class ImageSet(db.Model):
+#     __tablename__ = 'imagesets'
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+#     upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+#     folder_path = db.Column(db.String(255), nullable=False)
+#     file_path = db.Column(db.String(255), nullable=False)
+
+#     user = db.relationship('User', backref=db.backref('imageset', lazy=True))
+
+class Recipe(db.Model):
+    __tablename__ = 'recipes'
+    id = db.Column(db.Integer, primary_key=True)
+    set_id = db.Column(db.Integer, db.ForeignKey('imagesets.id'), nullable=False)
+    recipe = db.Column(db.Text, nullable=False)
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    imageset = db.relationship('ImageSet', backref=db.backref('recipes', lazy=True))
+
+class Product(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+
+class RecipeProduct(db.Model):
+    __tablename__ = 'recipe_products'
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+
+    recipe = db.relationship('Recipe', backref=db.backref('recipe_products', lazy=True))
+    product = db.relationship('Product', backref=db.backref('recipe_products', lazy=True))

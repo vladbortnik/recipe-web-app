@@ -13,6 +13,9 @@ services:
       FLASK_DEBUG: 1
       DB_HOST: db
       DB_PORT: 5432
+      POSTGRES_DB: recipe_db  # Ensure this is set correctly
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     depends_on:
       - db
 
@@ -24,6 +27,8 @@ services:
       POSTGRES_DB: recipe_db
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres_data:

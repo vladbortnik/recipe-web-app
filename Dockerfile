@@ -1,5 +1,6 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.12.5-slim
+# FROM python:3.12.5-slim
+FROM python:3.12.5
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,8 +12,8 @@ WORKDIR /code
 # Copy the current directory . in the project to the workdir . in the image
 COPY . .
 
-# Update the package list and install netcat
-RUN apt-get update && apt-get install -y -f netcat-openbsd
+# Update the package list and install netcat & PostgreSQL client
+RUN apt-get update && apt-get install -y -f netcat-openbsd postgresql-client
 
 # Install dependencies
 RUN pip install --upgrade pip

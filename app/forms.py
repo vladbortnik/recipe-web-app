@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-# from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
@@ -17,6 +17,15 @@ class SignupForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password:', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
+# forms.py (additions)
+
+class UploadImageForm(FlaskForm):
+    images = MultipleFileField('Upload Images:', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!'), DataRequired()])
+    submit = SubmitField('Upload')
+
+
+
+
 # class ResetPasswordRequestForm(FlaskForm):
 #     email = StringField('Email: ', validators=[DataRequired(), Email()])
 #     phone_number = StringField('Phone Number: ', validators=[Length(min=10, max=15)])
@@ -27,3 +36,12 @@ class SignupForm(FlaskForm):
 #     new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
 #     confirm_new_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
 #     submit = SubmitField('Reset Password')
+
+# class ImageUploadForm(FlaskForm):
+    # title = StringField('Book Title:', validators=[DataRequired()])
+    # department = StringField('Department:', validators=[DataRequired()])
+    # content = TextAreaField('Author Name & Edition:', validators=[DataRequired()])
+    # image = FileField('Upload Image:', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
+    # image = FileField('Upload Image:', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
+    # image = FileField('Upload Image:', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
+    # submit = SubmitField('Post')

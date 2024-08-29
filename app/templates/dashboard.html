@@ -1,0 +1,38 @@
+<!-- templates/dashboard.html -->
+{% extends "layout.html" %}
+
+{% block title %}Dashboard | Recipe{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Dashboard</h2>
+
+    <h3>Your Uploaded Image Sets</h3>
+    {% if grouped_image_sets %}
+        {% for unique_folder, image_sets in grouped_image_sets.items() %}
+            <div class="folder-section">
+                <h4>Folder: {{ unique_folder }}</h4>
+                <div class="row">
+                    {% for image_set in image_sets %}
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <article class="media content-section" style="margin-top:20px;">
+                                <img src="{{ url_for('static', filename=image_set.file_path) }}" class="img-fluid" style="max-height:150px; margin-right:20px;" alt="Product image">
+                                <div class="media-body">
+                                    <h2 class="article-title">{{ image_set.user.email }}</h2>
+                                    <div>
+                                        <h6 class="mr-2">User: {{ image_set.user_id }}</h6>
+                                        <h6 class="mr-2">Date uploaded: {{ image_set.upload_date.strftime('%Y-%m-%d') }}</h6>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No uploaded image sets yet.</p>
+    {% endif %}
+    <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload New Images</a>
+</div>
+{% endblock %}

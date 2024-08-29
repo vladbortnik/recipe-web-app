@@ -1,0 +1,27 @@
+<!-- templates/upload.html -->
+{% extends "layout.html" %}
+
+{% block title %}Upload | Recipe{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+   <h2>Upload Images</h2>
+   <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+         {{ form.images.label(class="form-control-label") }}
+         {{ form.images(class="form-control-file", multiple=True) }}
+         {% if form.images.errors %}
+            <div class="invalid-feedback">
+               {% for error in form.images.errors %}
+                  <span>{{ error }}</span>
+               {% endfor %}
+            </div>
+         {% endif %}
+      </div>
+      <div class="form-group">
+         {{ form.submit(class="btn btn-primary") }}
+      </div>
+   </form>
+</div>
+{% endblock %}
