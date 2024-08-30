@@ -16,6 +16,7 @@
                     {% for image_set in image_sets %}
                         <div class="col-lg-4 col-md-6 col-sm-12">
                             <article class="media content-section" style="margin-top:20px;">
+                                <!-- NEXT LINE HAS A LOGICAL BUG -->
                                 <img src="{{ url_for('static', filename=image_set.file_path) }}" class="img-fluid" style="max-height:150px; margin-right:20px;" alt="Product image">
                                 <div class="media-body">
                                     <h2 class="article-title">{{ image_set.user.email }}</h2>

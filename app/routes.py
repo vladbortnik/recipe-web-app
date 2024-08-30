@@ -3,9 +3,9 @@ from flask import request, render_template, redirect, url_for, flash
 from flask_login import login_user, current_user, logout_user, login_required
 from .forms import LoginForm, SignupForm, UploadImageForm
 from . import db, bcrypt, login_manager # Import 'db & bcrypt' from the app package
-from .models import User, Recipe, ImageSet, Product, RecipeProduct
+from .models import User, Recipe, ImgSet
 import uuid, os
-from .utils import process_images
+from .utils import process_imgset
 
 @app.route('/')
 def index():
@@ -55,19 +55,63 @@ def logout():
     flash('You have been logged out', 'success')
     return redirect(url_for('index'))
 
-# @app.route('/dashboard')
+
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    form = UploadImageForm()
+    if form.validate_on_submit():
+        if form.images.data:
+            # Create a unique folder for this upload
+            unique_dir = os.path.join(str(current_user.id), str(uuid.uuid4()))
+            curr_upload_folder = os.path.join(app.config['UPLOAD_FOLDER'], unique_dir)
+            os.makedirs(curr_upload_folder, exist_ok=True)
+
+            for file in form.images.data:
+                filename = f"{uuid.uuid4()}_{file.filename}"
+                file_path = os.path.join(curr_upload_folder, filename)
+                file.save(file_path)
+
+            imgset = ImgSet(user_id=current_user.id, unique_dir=unique_dir)
+            db.session.add(imgset)
+            db.session.commit()
+
+            # Process images and generate recipes if needed
+            process_imgset(curr_upload_folder)  # Assuming function exists in utils.py
+
+            flash('Images uploaded successfully', 'success')
+            # return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
+
+    return render_template('upload.html', form=form)
+
+
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    imgsets = ImgSet.query.filter_by(user_id=current_user.id).all()
+    # Group images by unique_dir
+    grouped_imgsets = {}
+    for imgset in imgsets:
+        if imgset.unique_dir not in grouped_imgsets:
+            grouped_imgsets[imgset.unique_dir] = []
+        grouped_imgsets[imgset.unique_dir].append(imgset)
+    
+    return render_template('dashboard.html', grouped_imgsets=grouped_imgsets)
+
+
+
+
+# @app.route('/dashboard', methods=['GET'])
 # @login_required
 # def dashboard():
-#     return render_template('dashboard.html')
-
-# @app.route('/upload')
-# @login_required
-# def upload():
-#     return render_template('upload.html')
+#     image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
+#     return render_template('dashboard.html', image_sets=image_sets)
 
 
-# Ensure your upload folder is configured
-# app.config['UPLOAD_FOLDER'] = 'path/to/upload/folder'
 
 # @app.route('/upload', methods=['GET', 'POST'])
 # @login_required
@@ -91,10 +135,6 @@ def logout():
     
 #     return render_template('upload.html', form=form)
 
-# # routes.py (additions)
-# from flask import current_app as app
-# import uuid
-
 
 # @app.route('/upload', methods=['GET', 'POST'])
 # @login_required
@@ -103,12 +143,12 @@ def logout():
 #     if form.validate_on_submit():
 #         if form.images.data:
 #             filename = f"{uuid.uuid4()}_{form.images.data.filename}"
-#             user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
-#             os.makedirs(user_folder, exist_ok=True)
-#             file_path = os.path.join(user_folder, filename)
+#             curr_upload_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
+#             os.makedirs(curr_upload_folder, exist_ok=True)
+#             file_path = os.path.join(curr_upload_folder, filename)
 #             form.images.data.save(file_path)
             
-#             imageset = ImageSet(user_id=current_user.id, folder_path=user_folder, file_path=file_path)
+#             imageset = ImageSet(user_id=current_user.id, folder_path=curr_upload_folder, file_path=file_path)
 #             db.session.add(imageset)
 #             db.session.commit()
             
@@ -119,53 +159,3 @@ def logout():
 #             return redirect(url_for('dashboard'))
     
 #     return render_template('upload.html', form=form)
-
-
-@app.route('/upload', methods=['GET', 'POST'])
-@login_required
-def upload():
-    form = UploadImageForm()
-    if form.validate_on_submit():
-        if form.images.data:
-            # Create a unique folder for this upload
-            unique_folder = str(uuid.uuid4())
-            user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), unique_folder)
-            os.makedirs(user_folder, exist_ok=True)
-
-            for file in form.images.data:
-                filename = f"{uuid.uuid4()}_{file.filename}"
-                file_path = os.path.join(user_folder, filename)
-                file.save(file_path)
-
-                imageset = ImageSet(user_id=current_user.id, folder_path=user_folder, file_path=file_path, unique_folder=unique_folder)
-                db.session.add(imageset)
-            db.session.commit()
-
-            # Process images and generate recipes if needed
-            process_images(user_folder)  # Assuming function exists in utils.py
-
-            flash('Images uploaded successfully', 'success')
-            return redirect(url_for('dashboard'))
-
-    return render_template('upload.html', form=form)
-
-
-
-# @app.route('/dashboard', methods=['GET'])
-# @login_required
-# def dashboard():
-#     image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
-#     return render_template('dashboard.html', image_sets=image_sets)
-
-@app.route('/dashboard', methods=['GET'])
-@login_required
-def dashboard():
-    image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
-    # Group images by unique_folder
-    grouped_image_sets = {}
-    for image_set in image_sets:
-        if image_set.unique_folder not in grouped_image_sets:
-            grouped_image_sets[image_set.unique_folder] = []
-        grouped_image_sets[image_set.unique_folder].append(image_set)
-    
-    return render_template('dashboard.html', grouped_image_sets=grouped_image_sets)

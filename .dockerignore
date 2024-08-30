@@ -5,11 +5,7 @@
 __pycache__/
 *.env
 
-# Environment & Config Files
-# 
-# Do NOT forget to pass ".env" to "compose.yaml":
-#   ...  env_file:
-#   ...   - .env
+# Docker-Compose automatically load the ".env" from the same dir as the "compose.yaml".
 .env
 *.env.*
 *.ini

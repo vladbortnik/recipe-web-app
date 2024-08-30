@@ -17,8 +17,6 @@ class SignupForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password:', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
-# forms.py (additions)
-
 class UploadImageForm(FlaskForm):
     images = MultipleFileField('Upload Images:', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!'), DataRequired()])
     submit = SubmitField('Upload')

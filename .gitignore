@@ -1,10 +1,16 @@
+###############################
+### PROJECT SPECIFIC FILES  ###
+###############################
+
+.info/
+/app/static/upload_dir/
+
+###############################
+
 # General
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Personal folders
-.info/
 
 # macOS metadata files
 ._*
