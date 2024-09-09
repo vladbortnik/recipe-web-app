@@ -14,10 +14,10 @@ class ImgSet(db.Model):
     __tablename__ = 'imgsets'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    unique_dir = db.Column(db.String(255), nullable=False)
+    # unique_dir = db.Column(db.String(255), nullable=False)
+    folder_path = db.Column(db.String(255), nullable=False)
+    products = db.Column(db.Text)  # Store detected products as a comma-separated string
     upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-    # folder_path = db.Column(db.String(255), nullable=False)
-    # file_path = db.Column(db.String(255), nullable=False)
 
     user = db.relationship('User', backref=db.backref('imgsets', lazy=True))
 

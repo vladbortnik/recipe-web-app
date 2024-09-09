@@ -1,8 +1,8 @@
 """Auto migration
 
-Revision ID: 2bc82ff7c385
+Revision ID: db15c6c411f5
 Revises: 
-Create Date: 2024-08-30 06:21:15.780426
+Create Date: 2024-09-08 18:36:52.118213
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2bc82ff7c385'
+revision = 'db15c6c411f5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,7 +28,8 @@ def upgrade():
     op.create_table('imgsets',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('unique_dir', sa.String(length=255), nullable=False),
+    sa.Column('folder_path', sa.String(length=255), nullable=False),
+    sa.Column('products', sa.Text(), nullable=True),
     sa.Column('upload_date', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

@@ -2,7 +2,8 @@
 ### PROJECT SPECIFIC FILES  ###
 ###############################
 
-.info/
+# .info/
+# .api-keys/
 /app/static/upload_dir/
 
 ###############################
@@ -19,6 +20,11 @@
 # Normally, you don't want to include the .dockerignore
 # .dockerignore
 
+# ALEMBIC / flask-migrate
+#
+# Do not include it (unless you have a good reason)
+# migrations/
+
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
@@ -34,10 +40,6 @@
 Network Trash Folder
 Temporary Items
 .apdisk
-
-# flask-migrate/Alembic
-# Do not include it (unless you have a good reason)
-# migrations
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
