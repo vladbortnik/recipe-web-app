@@ -9,6 +9,14 @@ class Config:
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
     AZURE_COMPUTERVISION_KEY = os.getenv('AZURE_COMPUTERVISION_KEY')
     AZURE_COMPUTERVISION_ENDPOINT = os.getenv('AZURE_COMPUTERVISION_ENDPOINT')
+    SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY')
+    DEBUG_TB_INTERCEPT_REDIRECTS = False  # Disable intercepting redirects
+    SQLALCHEMY_RECORD_QUERIES = True  # Explicitly enable recording of SQLAlchemy queries
+    # DEBUG_TB_PROFILER_ENABLED = True  # Enable profiler
+
+
+
+
 
 
 

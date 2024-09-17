@@ -5,7 +5,12 @@ from .forms import LoginForm, SignupForm, UploadImageForm
 from . import db, bcrypt, login_manager # Import 'db & bcrypt' from the app package
 from .models import User, Recipe, ImgSet
 import uuid, os
-from .utils import process_imgset
+from .utils import process_imgset, get_recipe
+
+### DEBUG ####################
+from pprint import pprint as pp
+##############################
+
 
 @app.route('/')
 def index():
@@ -80,16 +85,53 @@ def upload():
             process_imgset(folder_path)  # Assuming function exists in utils.py
 
             flash('Images uploaded and processed successfully.', 'success')
-            # return redirect(url_for('dashboard'))
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
+            # return redirect(url_for('index'))
 
     return render_template('upload.html', form=form)
+
+
 
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    pass
+    # Let's assume each user has only one imgset
+    imgset = ImgSet.query.filter_by(user_id=current_user.id).first()
+    
+    products = imgset.products.split(',') if imgset and imgset.products else []
+
+    ##### DEBUG ######################
+    # pp(f'/dashboard::dashboard::products == {products}')
+    ##################################
+
+    
+    return render_template('dashboard.html', products=products)
+
+@app.route('/dashboard', methods=['POST'])
+@login_required
+def get_dashboard_recipe():
+    pressed_products = request.form.getlist('product')
+
+    ##### DEBUG ######################
+    # pressed_products = ['tomato', 'lettuce', 'olive oil', 'salt', 'pepper']
+    # pp(f'/dashboard::get_dashboard_recipe::pressed_products == {pressed_products}')
+    ##################################
+    
+    recipes = get_recipe(pressed_products)
+    
+    return render_template('dashboard.html', recipes=recipes, products=pressed_products)
+
+
+
+
+
+
+
+# @app.route('/dashboard', methods=['GET'])
+# @login_required
+# def dashboard():
+#     pass
     # imgsets = ImgSet.query.filter_by(user_id=current_user.id).all()
     # # Group images by unique_dir
     # grouped_imgsets = {}

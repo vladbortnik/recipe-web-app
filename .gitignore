@@ -2,7 +2,7 @@
 ### PROJECT SPECIFIC FILES  ###
 ###############################
 
-# .info/
+_info/
 # .api-keys/
 /app/static/upload_dir/
 

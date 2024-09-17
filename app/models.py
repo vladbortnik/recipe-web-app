@@ -14,7 +14,6 @@ class ImgSet(db.Model):
     __tablename__ = 'imgsets'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    # unique_dir = db.Column(db.String(255), nullable=False)
     folder_path = db.Column(db.String(255), nullable=False)
     products = db.Column(db.Text)  # Store detected products as a comma-separated string
     upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -29,6 +28,8 @@ class Recipe(db.Model):
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     imgset = db.relationship('ImgSet', backref=db.backref('recipes', lazy=True))
+
+
 
 
 ###########  COPY OF ImgSet  ###########

@@ -1,6 +1,9 @@
 FROM python:3.12.5-slim
 # FROM python:3.12.5
 
+# Set environment variable for terminal capabilities
+# ENV TERM xterm-256color
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
