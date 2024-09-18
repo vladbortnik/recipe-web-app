@@ -67,9 +67,11 @@ def upload():
     if form.validate_on_submit():
         if form.images.data:
             # Create a unique folder for this upload
-            # unique_dir = os.path.join(str(current_user.id), str(uuid.uuid4()))
+            # unique_dir = os.path.join(str(current_user.id), str(uuid.uuid4())) -- old version
             unique_dir_name = str(uuid.uuid4())
             folder_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), unique_dir_name)
+            # OR
+            # folder_path = os.path.join(os.getenv['UPLOAD_FOLDER'], str(current_user.id), unique_dir_name)
             os.makedirs(folder_path, exist_ok=True)
 
             for file in form.images.data:
@@ -81,23 +83,26 @@ def upload():
             db.session.add(imgset)
             db.session.commit()
 
-            # Process images and generate recipes if needed
-            process_imgset(folder_path)  # Assuming function exists in utils.py
+            # Process images (Azure Vision API)
+            process_imgset(folder_path)
 
             flash('Images uploaded and processed successfully.', 'success')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('get_dashboard_products', imgset_id=imgset.id))
             # return redirect(url_for('index'))
 
     return render_template('upload.html', form=form)
 
+####################################################################
+############  TO BE CONTINUED...  ##################################
+####################################################################
 
-
-
-@app.route('/dashboard', methods=['GET'])
+# @app.route('/dashboard', methods=['GET'])
+@app.route('/dashboard/default', methods=['GET'])
 @login_required
 def dashboard():
     # Let's assume each user has only one imgset
     imgset = ImgSet.query.filter_by(user_id=current_user.id).first()
+    # imgset = ImgSet.query.filter_by(user_id=current_user.id).get_or_404(imgset_id)
     
     products = imgset.products.split(',') if imgset and imgset.products else []
 
@@ -106,6 +111,19 @@ def dashboard():
     ##################################
 
     
+    return render_template('dashboard.html', products=products)
+
+####################################################################
+############  TO BE CONTINUED...  ##################################
+####################################################################
+
+@app.route('/dashboard/<int:imgset_id>', methods=['GET'])
+@login_required
+def get_dashboard_products(imgset_id):
+    # imgset = ImgSet.query.filter_by(user_id=current_user.id).get_or_404(imgset_id)
+    imgset = ImgSet.query.get_or_404(imgset_id)
+    products = imgset.products.split(',') if imgset and imgset.products else []
+
     return render_template('dashboard.html', products=products)
 
 @app.route('/dashboard', methods=['POST'])
