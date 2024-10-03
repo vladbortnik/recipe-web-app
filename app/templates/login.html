@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2>LogIn</h2>
-    <form method="POST" action="{{ url_for('login') }}">
+    <form method="POST" action="{{ url_for('login', next=request.args.get('next')) }}">
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.email.label }} {{ form.email(class="form-control") }}

@@ -12,7 +12,6 @@ services:
       FLASK_APP: run.py
       FLASK_ENV: development
       FLASK_DEBUG: 1
-      # DEBUG_TB_PROFILER_ENABLED: 'true'  # Enable Debug Toolbar Profiler
       DB_HOST: db
       DB_PORT: 5432
       POSTGRES_DB: "${POSTGRES_DB}"

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container">
-  <form id="product-form" method="post">
+  <form id="product-form" method="POST">
     <div class="product-buttons">
       {% for product in products %}
         <label class="btn btn-secondary product-checkbox">
@@ -46,8 +46,14 @@
 </script>
 {% endblock %}
 
+
+
+
+
+
+
 <!-- JS => 1 -->
-<script>
+<!-- <script>
   document.addEventListener('DOMContentLoaded', function () {
     const labels = document.querySelectorAll('.product-checkbox');
     labels.forEach(label => label.addEventListener('click', function (event) {
@@ -58,10 +64,10 @@
       }
     }));
   });
-  </script>
+  </script> -->
 
 <!-- JS => 2 -->
-<script>
+<!-- <script>
 document.addEventListener('DOMContentLoaded', function () {
   const labels = document.querySelectorAll('.product-checkbox');
   labels.forEach(label => label.addEventListener('click', function (event) {
@@ -76,4 +82,4 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log(`Checkbox ${checkbox.value} checked: ${checkbox.checked}`);
   }));
 });
-</script>
+</script> -->

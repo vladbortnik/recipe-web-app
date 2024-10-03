@@ -1,8 +1,4 @@
 FROM python:3.12.5-slim
-# FROM python:3.12.5
-
-# Set environment variable for terminal capabilities
-# ENV TERM xterm-256color
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 # Create working directory
 WORKDIR /code
 
-# Copy the current directory . in the project to the workdir . in the image
+# Copy the current directory "." in the project to the "WORKDIR" in the image (i.e. '/code')
 COPY . .
 
 # Update the package list and install netcat & PostgreSQL client

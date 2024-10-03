@@ -1,8 +1,8 @@
 """Auto migration
 
-Revision ID: c3011550ec8b
+Revision ID: 302f0a4efee6
 Revises: 
-Create Date: 2024-09-18 03:31:04.854573
+Create Date: 2024-10-03 02:47:13.257640
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c3011550ec8b'
+revision = '302f0a4efee6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,6 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=70), nullable=False),
     sa.Column('password', sa.String(length=256), nullable=False),
+    sa.Column('date_created', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -36,10 +37,10 @@ def upgrade():
     )
     op.create_table('recipes',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('set_id', sa.Integer(), nullable=False),
-    sa.Column('recipe', sa.Text(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('recipes', sa.Text(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['set_id'], ['imgsets.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

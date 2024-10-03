@@ -1,16 +1,11 @@
-from flask import current_app as app
-from flask import request, render_template, redirect, url_for, flash
-from flask_login import login_user, current_user, logout_user, login_required
-from .forms import LoginForm, SignupForm, UploadImageForm
-from . import db, bcrypt, login_manager # Import 'db & bcrypt' from the app package
-from .models import User, Recipe, ImgSet
 import uuid, os
-from .utils import process_imgset, get_recipe
-
-### DEBUG ####################
-from pprint import pprint as pp
-##############################
-
+from flask import current_app as app
+from flask import request, render_template, redirect, url_for, flash, session
+from flask_login import login_user, current_user, logout_user, login_required
+from . import db, bcrypt
+from .forms import LoginForm, SignupForm, UploadImageForm
+from .models import User, ImgSet
+from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_user_recipes
 
 @app.route('/')
 def index():
@@ -21,6 +16,7 @@ def login():
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
         return redirect(url_for('index'))
+    
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -31,6 +27,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Login failed. Please check email and password.', 'danger')
+            
     return render_template('login.html', form=form)
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -38,12 +35,12 @@ def signup():
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
         return redirect(url_for('index'))
+    
     form = SignupForm()
     if form.validate_on_submit():
         email = form.email.data
         if email and User.query.filter_by(email=email).first():
             flash('Email already registered', 'danger')
-            return render_template('signup.html', form=form)
         else:
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
             user = User(email=email, password=hashed_password)
@@ -51,6 +48,7 @@ def signup():
             db.session.commit()
             flash('Your account has been created successfully.', 'success')
             return redirect(url_for('login'))
+        
     return render_template('signup.html', form=form)
 
 @app.route("/logout")
@@ -66,154 +64,52 @@ def upload():
     form = UploadImageForm()
     if form.validate_on_submit():
         if form.images.data:
-            # Create a unique folder for this upload
-            # unique_dir = os.path.join(str(current_user.id), str(uuid.uuid4())) -- old version
+            # Create a 'unique_folder' for a set of uploaded images
             unique_dir_name = str(uuid.uuid4())
-            folder_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), unique_dir_name)
-            # OR
-            # folder_path = os.path.join(os.getenv['UPLOAD_FOLDER'], str(current_user.id), unique_dir_name)
+            folder_path = os.path.join(os.getenv('UPLOAD_FOLDER'), str(current_user.id), unique_dir_name)
             os.makedirs(folder_path, exist_ok=True)
 
+            # Save uploaded images to 'unique_folder'
             for file in form.images.data:
                 filename = f"{uuid.uuid4()}_{file.filename}"
                 file_path = os.path.join(folder_path, filename)
                 file.save(file_path)
 
+            # Create an Entry in DB with the path to 'unique_folder'
             imgset = ImgSet(user_id=current_user.id, folder_path=folder_path)
             db.session.add(imgset)
             db.session.commit()
 
-            # Process images (Azure Vision API)
-            process_imgset(folder_path)
+            # Process images in 'unique_folder' via Azure Vision API
+            # ...then Add recognized 'product.tags' to (the same entry in) DB as CSV
+            products = retrieve_product_labels(folder_path)
 
+            # Pass recognized products to '/dashboard'
+            session['products'] = products
             flash('Images uploaded and processed successfully.', 'success')
-            return redirect(url_for('get_dashboard_products', imgset_id=imgset.id))
-            # return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
 
     return render_template('upload.html', form=form)
 
-####################################################################
-############  TO BE CONTINUED...  ##################################
-####################################################################
-
-# @app.route('/dashboard', methods=['GET'])
-@app.route('/dashboard/default', methods=['GET'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    # Let's assume each user has only one imgset
-    imgset = ImgSet.query.filter_by(user_id=current_user.id).first()
-    # imgset = ImgSet.query.filter_by(user_id=current_user.id).get_or_404(imgset_id)
+    if request.method == 'POST':
+        # Get list of products a user checks on 'dashboard.html'
+        # ...and obtain corresponding recipes via Spoonacular API
+        products = request.form.getlist('product')
+        recipes = retrieve_recipes_by_ingredients(products)
+        
+    else:
+        ## CASE 1: Redirected from '/upload'
+        products = session.pop('products', default=None)
+        if products:
+            # Obtain corresponding recipes via Spoonacular API
+            recipes = retrieve_recipes_by_ingredients(products)
+        else:
+            ## CASE 2: Default for "GET /dashboard"
+            # Fetch ALL the 'products && recipes' for CURR_USER from DB
+            products = fetch_user_products()
+            recipes = fetch_user_recipes()
     
-    products = imgset.products.split(',') if imgset and imgset.products else []
-
-    ##### DEBUG ######################
-    # pp(f'/dashboard::dashboard::products == {products}')
-    ##################################
-
-    
-    return render_template('dashboard.html', products=products)
-
-####################################################################
-############  TO BE CONTINUED...  ##################################
-####################################################################
-
-@app.route('/dashboard/<int:imgset_id>', methods=['GET'])
-@login_required
-def get_dashboard_products(imgset_id):
-    # imgset = ImgSet.query.filter_by(user_id=current_user.id).get_or_404(imgset_id)
-    imgset = ImgSet.query.get_or_404(imgset_id)
-    products = imgset.products.split(',') if imgset and imgset.products else []
-
-    return render_template('dashboard.html', products=products)
-
-@app.route('/dashboard', methods=['POST'])
-@login_required
-def get_dashboard_recipe():
-    pressed_products = request.form.getlist('product')
-
-    ##### DEBUG ######################
-    # pressed_products = ['tomato', 'lettuce', 'olive oil', 'salt', 'pepper']
-    # pp(f'/dashboard::get_dashboard_recipe::pressed_products == {pressed_products}')
-    ##################################
-    
-    recipes = get_recipe(pressed_products)
-    
-    return render_template('dashboard.html', recipes=recipes, products=pressed_products)
-
-
-
-
-
-
-
-# @app.route('/dashboard', methods=['GET'])
-# @login_required
-# def dashboard():
-#     pass
-    # imgsets = ImgSet.query.filter_by(user_id=current_user.id).all()
-    # # Group images by unique_dir
-    # grouped_imgsets = {}
-    # for imgset in imgsets:
-    #     if imgset.unique_dir not in grouped_imgsets:
-    #         grouped_imgsets[imgset.unique_dir] = []
-    #     grouped_imgsets[imgset.unique_dir].append(imgset)
-    
-    # return render_template('dashboard.html', grouped_imgsets=grouped_imgsets)
-
-
-
-
-# @app.route('/dashboard', methods=['GET'])
-# @login_required
-# def dashboard():
-#     image_sets = ImageSet.query.filter_by(user_id=current_user.id).all()
-#     return render_template('dashboard.html', image_sets=image_sets)
-
-
-
-# @app.route('/upload', methods=['GET', 'POST'])
-# @login_required
-# def upload():
-#     form = UploadImageForm()
-#     if form.validate_on_submit():
-#         if form.images.data:
-#             filename = secure_filename(form.images.data.filename)
-#             folder_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id), filename)
-#             os.makedirs(os.path.dirname(folder_path), exist_ok=True)
-#             form.images.data.save(folder_path)
-            
-#             imageset = ImageSet(user_id=current_user.id, folder_path=folder_path, file_path=folder_path)
-#             db.session.add(imageset)
-#             db.session.commit()
-            
-#             # After saving, you may want to process the images and generate recipes
-
-#             flash('Images uploaded successfully', 'success')
-#             return redirect(url_for('dashboard'))
-    
-#     return render_template('upload.html', form=form)
-
-
-# @app.route('/upload', methods=['GET', 'POST'])
-# @login_required
-# def upload():
-#     form = UploadImageForm()
-#     if form.validate_on_submit():
-#         if form.images.data:
-#             filename = f"{uuid.uuid4()}_{form.images.data.filename}"
-#             folder_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
-#             os.makedirs(folder_path, exist_ok=True)
-#             file_path = os.path.join(folder_path, filename)
-#             form.images.data.save(file_path)
-            
-#             imageset = ImageSet(user_id=current_user.id, folder_path=folder_path, file_path=file_path)
-#             db.session.add(imageset)
-#             db.session.commit()
-            
-#             # Process images and generate recipes if needed
-#             process_images(file_path)  # Assuming function exists in utils.py
-
-#             flash('Images uploaded successfully', 'success')
-#             return redirect(url_for('dashboard'))
-    
-#     return render_template('upload.html', form=form)
+    return render_template('dashboard.html', products=products, recipes=recipes)
