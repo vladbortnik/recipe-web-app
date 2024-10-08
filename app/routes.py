@@ -98,6 +98,9 @@ def dashboard():
         # Get list of products a user checks on 'dashboard.html'
         # ...and obtain corresponding recipes via Spoonacular API
         products = request.form.getlist('product')
+        if not products:
+            flash('Please choose at least 1 product.', 'warning')
+            return redirect(url_for('dashboard'))
         recipes = retrieve_recipes_by_ingredients(products)
         
     else:

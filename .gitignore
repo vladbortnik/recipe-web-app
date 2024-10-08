@@ -1,12 +1,6 @@
-###############################
-### PROJECT SPECIFIC FILES  ###
-###############################
-
-_info/
-# .api-keys/
+# PROJECT SPECIFIC
+my_info/
 /app/static/upload_dir/
-
-###############################
 
 # General
 .DS_Store
@@ -15,15 +9,6 @@ _info/
 
 # macOS metadata files
 ._*
-
-# Docker Specific
-# Normally, you don't want to include the .dockerignore
-# .dockerignore
-
-# ALEMBIC / flask-migrate
-#
-# Do not include it (unless you have a good reason)
-# migrations/
 
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100

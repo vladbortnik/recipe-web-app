@@ -8,15 +8,6 @@ services:
       - "5001:5001"
     env_file:
       - .env
-    environment:
-      FLASK_APP: run.py
-      FLASK_ENV: development
-      FLASK_DEBUG: 1
-      DB_HOST: db
-      DB_PORT: 5432
-      POSTGRES_DB: "${POSTGRES_DB}"
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     depends_on:
       - db
 
@@ -26,10 +17,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-    environment:
-      POSTGRES_DB: "${POSTGRES_DB}"
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     ports:
       - "5432:5432"
 

@@ -4,30 +4,37 @@
 {% block title %}Dashboard | Recipe{% endblock %}
 
 {% block content %}
-<div class="container">
-  <form id="product-form" method="POST">
-    <div class="product-buttons">
-      {% for product in products %}
-        <label class="btn btn-secondary product-checkbox">
-          <input type="checkbox" name="product" value="{{ product }}" class="d-none">{{ product }}
-        </label>
-      {% endfor %}
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
+<div class="container mt-3">
+
+  {% if products %}
+    <h3>Products:</h3>
+    <form id="product-form" method="POST">
+      <div class="grid-container">
+        {% for product in products %}
+          <div class="grid-item">
+            <label class="btn btn-secondary product-checkbox">
+              <input type="checkbox" name="product" value="{{ product }}" class="d-none">{{ product }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+    </form>
+  {% else: %}
+    <h4>There is no content to display.</h4>
+  {% endif %}
   
   {% if recipes %}
-  <hr>
-  <h3>Recipes:</h3>
-  <ul>
-    {% for recipe in recipes %}
-        <li>{{ recipe }}</li>
-    {% endfor %}
-  </ul>
+    <hr>
+    <h3>Recipes:</h3>
+    <ul>
+      {% for recipe in recipes %}
+          <li>{{ recipe }}</li>
+      {% endfor %}
+    </ul>
   {% endif %}
 </div>
 
-<!-- JS => 2 -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const labels = document.querySelectorAll('.product-checkbox');
@@ -45,41 +52,3 @@
   });
 </script>
 {% endblock %}
-
-
-
-
-
-
-
-<!-- JS => 1 -->
-<!-- <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const labels = document.querySelectorAll('.product-checkbox');
-    labels.forEach(label => label.addEventListener('click', function (event) {
-      if (!label.querySelector('input').checked) {
-        label.classList.replace('btn-secondary', 'btn-success');
-      } else {
-        label.classList.replace('btn-success', 'btn-secondary');
-      }
-    }));
-  });
-  </script> -->
-
-<!-- JS => 2 -->
-<!-- <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const labels = document.querySelectorAll('.product-checkbox');
-  labels.forEach(label => label.addEventListener('click', function (event) {
-    const checkbox = label.querySelector('input');
-    if (!checkbox.checked) {
-      label.classList.replace('btn-secondary', 'btn-success');
-      checkbox.checked = true;
-    } else {
-      label.classList.replace('btn-success', 'btn-secondary');
-      checkbox.checked = false;
-    }
-    console.log(`Checkbox ${checkbox.value} checked: ${checkbox.checked}`);
-  }));
-});
-</script> -->
