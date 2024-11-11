@@ -19,7 +19,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Port Exposure
-EXPOSE 5001
+EXPOSE 5000
 
 # ENTRYPOINT
 RUN chmod +x /code/scripts/entrypoint.sh
