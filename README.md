@@ -4,7 +4,7 @@
 
 **Host**: [recipe-web-app](http://recipe.vladbortnik.dev)
 
-**Note**:  *The Web App designed to showcase personal technical skills. It is NOT meant for production*.
+**Note**:  *The App is designed to showcase personal technical skills. It is NOT meant for production*.
 
 ---
 
