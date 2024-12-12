@@ -80,6 +80,14 @@
 - **Script Automation**:
   - Automated scripts such as `entrypoint.sh` manage startup processes and dependencies efficiently.
 
+- **Network Segregation**:
+  - Implemented Docker network isolation by creating separate `frontend` and `backend networks`.
+  - Removed direct host exposure of database `port 5432`, ensuring database access is only possible through internal Docker networks.
+  - `Frontend network` for public-facing services
+  - `Backend network` for sensitive services (database)
+  - No exposed database ports to host
+  - `Internal DNS resolution` between containers
+
 - **Production Deployment with Gunicorn**:
   - The application is served using `Gunicorn`, which allows for handling multiple requests concurrently, improving performance and reliability in a production environment.
   - `Gunicorn` can be easily configured to work with various worker types and settings to optimize performance based on the deployment needs.
@@ -92,6 +100,7 @@
 - **Environment Variables**: Manages sensitive information such as the secret key using environment variables to avoid hardcoding credentials.
 - **Access Control**: Protects routes to ensure that only Authenticated Users can access certain pages and perform specific actions.
 - **CSRF Protection**: Uses Flask-WTF to include CSRF (Cross-Site Request Forgery) Tokens in Forms, preventing Unauthorized Actions from being executed.
+- **Network Segregation**: Implemented Docker network isolation by creating separate `frontend` and `backend networks`.
 
 <br>
 
@@ -118,11 +127,11 @@ To set up and run the application using Docker Compose, follow these steps:
 4. **Build and run the containers**:
 
     ```bash
-    docker-compose up --build
+    docker-compose up --build -d
     ```
 
 5. **Access the application**:
-    - The web application will be accessible at `http://localhost:5001`.
+    - The web application will be accessible at `http://localhost:5002`.
 
 6. **Stop the services**:
 
