@@ -18,6 +18,9 @@ services:
       - .env
     depends_on:
       - db
+    mem_limit: 384m   # Docker Container Resource Limits
+    mem_reservation: 192m
+    cpus: 0.3
     restart: unless-stopped
 
   db:
@@ -27,9 +30,12 @@ services:
     env_file:
       - .env
     networks:
-      - backend   # Now only the Web Service have access to DB
+      - backend   # Only Web Service have access to DB
     # ports:
     #  - "5432:5432"   # Port is not exposed to the Host (Isolated from Iinternet)
+    mem_limit: 384m
+    mem_reservation: 192m   # Docker Container Resource Limits
+    cpus: 0.3
     restart: unless-stopped
 
 volumes:
