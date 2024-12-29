@@ -7,15 +7,5 @@ while ! nc -z "$DB_HOST" "$DB_PORT"; do
 done
 echo "PostgreSQL started..."
 
-# Initialize migrations if not present, otherwise upgrade
-if [ ! -d "migrations" ]; then
-  echo "Initializing database migrations..."
-  flask db init || { echo "Failed to initialize migrations..."; exit 1; }
-fi
-
-# Run migrations if migrations folder is present
-flask db migrate -m "Auto migration" || { echo "Failed to create migration..."; exit 1; }
-flask db upgrade || { echo "Failed to run migrations..."; exit 1; }
-
 # Start the flask app
 exec "$@"

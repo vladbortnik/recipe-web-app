@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED 1
 # Create working directory
 WORKDIR /code
 
-# Copy curr_dir "." to "/code"
-COPY . .
+# Copy code to the working directory
+COPY . /code/
 
 # Update the package list and install netcat & PostgreSQL client
 RUN apt-get update && apt-get install -y -f netcat-openbsd postgresql-client
@@ -18,9 +18,10 @@ RUN apt-get update && apt-get install -y -f netcat-openbsd postgresql-client
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Port Exposure
+# This instruction only serves as documentation
+# It does not actually publish the port to the host machine
 EXPOSE 5002
 
 # ENTRYPOINT
-RUN chmod +x /code/scripts/entrypoint.sh
+RUN chmod +x /code/scripts/entrypoint.sh /code/scripts/wait-for-migrations.sh
 ENTRYPOINT ["/code/scripts/entrypoint.sh"]

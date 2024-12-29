@@ -1,27 +1,72 @@
-# Network Segregation
-networks:
-  frontend:    # Public-facing network
-  backend:     # Private, internal network
-
 services:
-  web:
+  web1:
     build: .
     command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
-    volumes:
-      - .:/code
+    # volumes:        # Shared volumes can lead to conflict (when running more than 1 instance of an app)
+    #   - .:/code
     networks:
-      - frontend   # For communication with Internet
-      - backend    # For communication with DB only
+      - frontend      # For communication with Internet
+      - backend       # For communication with DB only
     ports:
-      - "5002:5002"   # The only necessary external port
+      - "5002:5002"
     env_file:
       - .env
     depends_on:
       - db
-    mem_limit: 384m   # Docker Container Resource Limits
-    mem_reservation: 192m
+      - migration
+    mem_limit: 512m   # Docker Container Resource Limits
+    mem_reservation: 256m
     cpus: 0.3
     restart: unless-stopped
+
+  # Second instance of the app
+  web2:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "5003:5002"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - migration
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.3
+    restart: unless-stopped
+
+  # Third instance of the app
+  web3:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "5004:5002"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - migration
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.3
+    restart: unless-stopped
+
+  migration:
+    build: .
+    command: ./scripts/wait-for-migrations.sh
+    networks:
+      - backend
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: "no"  # Run once and exit
 
   db:
     image: postgres:16.4
@@ -30,13 +75,18 @@ services:
     env_file:
       - .env
     networks:
-      - backend   # Only Web Service have access to DB
+      - backend       # Only Web Service have access to DB
     # ports:
-    #  - "5432:5432"   # Port is not exposed to the Host (Isolated from Iinternet)
-    mem_limit: 384m
+    #  - "5432:5432"  # Port is not exposed to the Host (Isolated from Iinternet)
+    mem_limit: 512m
     mem_reservation: 192m   # Docker Container Resource Limits
-    cpus: 0.3
+    cpus: 0.2
     restart: unless-stopped
+
+# Existing networks and volumes
+networks:
+  frontend:           # Public-facing network
+  backend:            # Private, internal network
 
 volumes:
   postgres_data:
