@@ -1,9 +1,9 @@
 FROM python:3.12.5-slim
 
 # Prevents Python from writing .pyc files, reducing unnecessary I/O
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 # Ensures stdout and stderr are unbuffered, making logs visible in real-time
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Create working directory
 WORKDIR /code
