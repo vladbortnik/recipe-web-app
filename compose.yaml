@@ -77,9 +77,9 @@ services:
     networks:
       - backend       # Only Web Service have access to DB
     # ports:
-    #  - "5432:5432"  # Port is not exposed to the Host (Isolated from Iinternet)
+    #  - "5432:5432"  # Port is not exposed to the Host (Isolated from Internet)
     mem_limit: 512m
-    mem_reservation: 192m   # Docker Container Resource Limits
+    mem_reservation: 128m   # Docker Container Resource Limits
     cpus: 0.2
     restart: unless-stopped
 

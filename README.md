@@ -8,87 +8,95 @@
 
 ## **Implementation:**
 
-### `Technologies`
+### `Tech Stack`
 
 - **Flask**:
-  - A lightweight WSGI web application framework in Python.
-  - Essential for routing, content rendering, etc.
+  - A lightweight WSGI web application framework in Python
+  - Essential for routing, content rendering, etc
 
 - **Extensions**:
   - **Flask-SQLAlchemy**
-    - Integration with SQLAlchemy for ORM capabilities.
+    - Integration with SQLAlchemy for ORM capabilities
   - **Flask-Migrate**
-    - Handles database migrations.
+    - Handles database migrations
   - **Flask-Bcrypt**
-    - Provides password hashing for security.
+    - Provides password hashing for security
   - **Flask-Login**
-    - Handles User Authentication, Session Management, and Protecting Routes.
+    - Handles User Authentication, Session Management, and Protecting Routes
   - **Flask-WTF**
-    - Used for Form Creation and Handling.
-    - Includes Text, Email, Password and File Validations to ensure Data Integrity.
+    - Used for Form Creation and Handling
+    - Includes Text, Email, Password and File Validations to ensure Data Integrity
   - **Python-dotenv**
-    - Used for loading environment variables from a `.env` file.
+    - Used for loading environment variables from a `.env` file
 
 - **PostgreSQL**:
-  - A powerful, open-source object-relational database system.
-  - Used for storing and managing application data.
+  - A powerful, open-source object-relational database system
+  - Used for storing and managing application data
 
 - **Docker and Docker Compose**:
-  - Fully containerized using Docker Images and `docker compose` for orchestration.
+  - Fully containerized using Docker Images and `docker compose` for orchestration
 
 - **Gunicorn**:
-  - WSGI Server allows for handling multiple requests concurrently, improving performance and reliability in a production environment.
+  - WSGI Server allows for handling multiple requests concurrently, improving performance and reliability in a production environment
 
 - **Azure Cognitive Services**:
-  - Provides computer vision capabilities to analyze images.
-  - Enables automatic ingredient recognition from uploaded images.
+  - Provides computer vision capabilities to analyze images
+  - Enables automatic ingredient recognition from uploaded images
 
 - **Spoonacular API**:
-  - Integration for fetching recipes based on ingredients.
-  - Provides additional recipe-related functionalities.
+  - Integration for fetching recipes based on ingredients
+  - Provides additional recipe-related functionalities
 
 <br>
 
 ### `Features`
 
 - **Frontend and User Interface**:
-  - HTML templates and CSS styles are used to construct a responsive and intuitive user interface.
-  - Built using `Jinja2` templating to dynamically render content based on backend data.
+  - HTML templates and CSS styles are used to construct a responsive and intuitive user interface
+  - Built using `Jinja2` templating to dynamically render content based on backend data
 
 - **User Authentication and Security**:
-  - Implements `Flask-Login` for user session management.
-  - `Bcrypt` is employed for secure password hashing and protection.
+  - Implements `Flask-Login` for user session management
+  - `Bcrypt` is employed for secure password hashing and protection
 
 - **Deployment and Containerization**:
-  - `Dockerfile` defines the app environment using a Python base image, ensuring consistency across deployments.
-  - `Docker Compose` manages services, enabling a multi-container architecture that includes a web service and a `PostgreSQL` database.
+  - `Dockerfile` defines the app environment using a Python base image, ensuring consistency across deployments
+  - `Docker Compose` manages services, enabling a multi-container architecture that includes a web service and a `PostgreSQL` database
 
 - **API Integration**:
-  - Utilizes external APIs such as `Azure Computer Vision` and `Spoonacular API` to enhance functionality with features like image recognition and recipe retrieval.
-  - Utility functions are managed within `utils.py`, ensuring clear code logic and readability.
+  - Utilizes external APIs such as `Azure Computer Vision` and `Spoonacular API` to enhance functionality with features like image recognition and recipe retrieval
+  - Utility functions are managed within `utils.py`, ensuring clear code logic and readability
 
 - **Database and Migrations**:
-  - Utilizes `PostgreSQL` for robust data storage.
-  - `Flask-Migrate` for handling database migrations.
+  - `Flask-Migrate` for handling database migrations
+  - Utilizes `PostgreSQL` for robust data storage
+  - `entrypoint.sh` handles migrations automatically
 
 - **Environment Configuration and Secrets Management**:
-  - Uses `.env` to manage sensitive information and environment variables securely.
-  - `config.py` manages environment-dependent configurations and API keys securely.
+  - Uses `.env` to manage sensitive information and environment variables securely
+  - `config.py` manages environment-dependent configurations and API keys securely
 
 - **Script Automation**:
-  - Automated scripts such as `entrypoint.sh` manage startup processes and dependencies efficiently.
+  - Automated scripts such as `entrypoint.sh` manage startup processes and dependencies efficiently
 
 - **Network Segregation**:
-  - Implemented Docker network isolation by creating separate `frontend` and `backend networks`.
-  - Removed direct host exposure of database `port 5432`, ensuring database access is only possible through internal Docker networks.
+  - Implemented Docker network isolation by creating separate `frontend` and `backend networks`
+  - Removed direct host exposure of database `port 5432`, ensuring database access is only possible through internal Docker networks
   - `Frontend network` for public-facing services
   - `Backend network` for sensitive services (database)
   - No exposed database ports to host
   - `Internal DNS resolution` between containers
 
+- **Load Balancer**:
+  - Deployed multiple instances (web1, web2, web3) of the web app using Docker Compose
+  - Implemented load balancing with Nginx to distribute incoming requests across multiple instances
+  - Ensured continuous application availability by routing traffic to healthy instances
+  - Demonstrated fault tolerance in a multi-instance environment
+  - Improved user experience with faster response times
+
 - **Production Deployment with Gunicorn**:
-  - The application is served using `Gunicorn`, which allows for handling multiple requests concurrently, improving performance and reliability in a production environment.
-  - `Gunicorn` can be easily configured to work with various worker types and settings to optimize performance based on the deployment needs.
+  - The application is served using `Gunicorn`, which allows for handling multiple requests concurrently, improving performance and reliability in a production environment
+  - `Gunicorn` can be easily configured to work with various worker types and settings to optimize performance based on the deployment needs
 
 <br>
 
@@ -110,7 +118,9 @@ This project combines modern web technologies and external APIs to deliver a ric
 
 To set up and run the application using Docker Compose, follow these steps:
 
-1. **Prerequisites**: Make sure you have Docker and Docker Compose installed on your machine.
+1. **Prerequisites**:
+    - Make sure you have Docker and Docker Compose installed on your machine
+    - Virtual Environments are strongly recommended
 
 2. **Clone the repository**:
 
@@ -120,7 +130,7 @@ To set up and run the application using Docker Compose, follow these steps:
     ```
 
 3. **Create an `.env` file**:
-    - Add your environment variables as needed. This file will be used for both the web and database services.
+    - Add your environment variables as needed. This file will be used for both the web and database services
 
 4. **Build and run the containers**:
 
@@ -129,7 +139,10 @@ To set up and run the application using Docker Compose, follow these steps:
     ```
 
 5. **Access the application**:
-    - The web application will be accessible at `http://localhost:5002`.
+    - The web application will be accessible at:
+      - http://localhost:5002
+      - http://localhost:5003
+      - http://localhost:5004
 
 6. **Stop the services**:
 
@@ -137,8 +150,9 @@ To set up and run the application using Docker Compose, follow these steps:
     docker-compose down
     ```
 
-7. **DB Init** (optional):
-   - `entrypoint.sh` handles migrations automatically.
+7. **DB Init**:
+   - `entrypoint.sh` handles migrations automatically
+   - There is no need to manually run migrations:
 
    ```bash
    flask db init
@@ -167,6 +181,7 @@ This setup includes a web application powered by Gunicorn and a PostgreSQL datab
 3. **Docker Logs**:
 
    ```bash
-   docker-compose logs web
-   docker-compose logs db
+   # Tail the logs 
+   docker-compose logs -f web1 web2 web3
+   docker-compose logs -f db
    ```

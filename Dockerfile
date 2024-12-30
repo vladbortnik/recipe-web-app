@@ -4,15 +4,22 @@ FROM python:3.12.5-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 # Ensures stdout and stderr are unbuffered, making logs visible in real-time
 ENV PYTHONUNBUFFERED=1
+# Prevents interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update the package list and install netcat, apt-utils & PostgreSQL client
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-utils \
+    netcat-openbsd \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Create working directory
 WORKDIR /code
 
 # Copy code to the working directory
 COPY . /code/
-
-# Update the package list and install netcat & PostgreSQL client
-RUN apt-get update && apt-get install -y -f netcat-openbsd postgresql-client
 
 # Install dependencies
 RUN pip install --upgrade pip
