@@ -8,7 +8,7 @@
 
 ## **Implementation:**
 
-### `Tech Stack`
+### `TECH STACK`
 
 - **Flask**:
   - A lightweight WSGI web application framework in Python
@@ -49,7 +49,7 @@
 
 <br>
 
-### `Features`
+### `FEATURES`
 
 - **Frontend and User Interface**:
   - HTML templates and CSS styles are used to construct a responsive and intuitive user interface
@@ -88,25 +88,25 @@
   - `Internal DNS resolution` between containers
 
 - **Load Balancer**:
-  - Deployed multiple instances (web1, web2, web3) of the web app using Docker Compose
-  - Implemented load balancing with Nginx to distribute incoming requests across multiple instances
+  - Deployed multiple instances (`web1`, `web2` and `web3`) of the web app using Docker Compose
+  - Configured for `Load Balancer` (e.g., Nginx, Apache) to distribute incoming requests across multiple instances
   - Ensured continuous application availability by routing traffic to healthy instances
-  - Demonstrated fault tolerance in a multi-instance environment
+  - Demonstrated `fault tolerance` in a multi-instance environment
   - Improved user experience with faster response times
 
 - **Production Deployment with Gunicorn**:
-  - The application is served using `Gunicorn`, which allows for handling multiple requests concurrently, improving performance and reliability in a production environment
+  - The application is served using `Gunicorn`, which allows for handling `multiple requests concurrently`, improving performance and reliability in a production environment
   - `Gunicorn` can be easily configured to work with various worker types and settings to optimize performance based on the deployment needs
 
 <br>
 
-### `Security`
+### `SECURITY`
 
 - **Password Encryption**: Utilizes Flask-Bcrypt to hash and securely store user passwords.
 - **Environment Variables**: Manages sensitive information such as the secret key using environment variables to avoid hardcoding credentials.
 - **Access Control**: Protects routes to ensure that only Authenticated Users can access certain pages and perform specific actions.
 - **CSRF Protection**: Uses Flask-WTF to include CSRF (Cross-Site Request Forgery) Tokens in Forms, preventing Unauthorized Actions from being executed.
-- **Network Segregation**: Implemented Docker network isolation by creating separate `frontend` and `backend networks`.
+- **Network Segregation**: Implemented Docker network isolation by creating separate frontend and backend networks.
 
 <br>
 
@@ -130,7 +130,9 @@ To set up and run the application using Docker Compose, follow these steps:
     ```
 
 3. **Create an `.env` file**:
-    - Add your environment variables as needed. This file will be used for both the web and database services
+    - Add your environment variables as needed
+    - Example of `.env` file is included
+    - This file will be used for both the web and database services
 
 4. **Build and run the containers**:
 
@@ -144,21 +146,21 @@ To set up and run the application using Docker Compose, follow these steps:
       - http://localhost:5003
       - http://localhost:5004
 
-6. **Stop the services**:
+6. **Stop running containers**:
 
     ```bash
     docker-compose down
     ```
 
-7. **DB Init**:
+7. **Database Initialization**:
    - `entrypoint.sh` handles migrations automatically
-   - There is no need to manually run migrations:
+   - There is **NO** need to manually run migrations:
 
-   ```bash
-   flask db init
-   flask db migrate -m "Initial migration."
-   flask db upgrade
-   ```
+      ```bash
+      flask db init
+      flask db migrate -m "Initial migration."
+      flask db upgrade
+      ```
 
 This setup includes a web application powered by Gunicorn and a PostgreSQL database. The services will automatically restart unless manually stopped.
 

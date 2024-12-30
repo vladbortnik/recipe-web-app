@@ -29,6 +29,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # It does not actually publish the port to the host machine
 EXPOSE 5002
 
+# Permissions
+RUN chmod +x /code/scripts/wait-for-migrations.sh
+RUN chmod +x /code/scripts/entrypoint.sh
+
 # ENTRYPOINT
-RUN chmod +x /code/scripts/entrypoint.sh /code/scripts/wait-for-migrations.sh
 ENTRYPOINT ["/code/scripts/entrypoint.sh"]
