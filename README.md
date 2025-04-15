@@ -47,7 +47,7 @@
   - Integration for fetching recipes based on ingredients
   - Provides additional recipe-related functionalities
 
-<br>
+<br> 
 
 ### `FEATURES`
 
