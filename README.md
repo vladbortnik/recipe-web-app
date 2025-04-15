@@ -2,7 +2,7 @@
 
 **Recipe** is a Web Application that enables users to upload images of whole food items, and generates meal recipes based on the available ingredients.
 
-**Live**: [Recipe Web App](http://recipe.vladbortnik.dev)
+**Live**: [RECIPE WEB APP](http://recipe.vladbortnik.dev)
 
 ---
 
