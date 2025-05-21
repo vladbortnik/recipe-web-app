@@ -1,0 +1,60 @@
+# Python specific
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+
+# Docker-Compose automatically load the ".env" from the same dir as the "compose.yaml".
+.env
+*.env.*
+*.ini
+*.cfg
+*.yaml
+*.yml
+
+# Docker specific
+Dockerfile
+.dockerignore
+
+# Flask specific
+instance/
+*.db
+*.sqlite3
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Test & Coverage Reports
+.coverage
+*.cover
+*.py,cover
+.tox/
+.nox/
+.cache/
+nosetests.xml
+coverage.xml
+*.coveragerc
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git related files
+.git/
+.gitignore

@@ -1,0 +1,360 @@
+<!-- templates/upload.html -->
+{% extends "layout.html" %}
+
+{% block title %} Upload | Recipe Hub {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+   <div class="row">
+      <div class="col-lg-8 mx-auto" data-aos="fade-up" data-aos-duration="800">
+         <div class="card">
+            <div class="card-header">
+               <h4 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>Upload Ingredients</h4>
+            </div>
+            <div class="card-body">
+               <div class="text-center mb-4">
+                  <div class="upload-icon-container mb-3">
+                     <i class="fas fa-camera fa-3x"></i>
+                  </div>
+                  <p class="lead fw-bold">Share your cooking creations by uploading images of your dishes</p>
+                  <p class="text-muted">We'll extract ingredients and help suggest recipes you can make!</p>
+               </div>
+               
+               <form method="POST" enctype="multipart/form-data" class="p-md-4 p-3">
+                  {{ form.hidden_tag() }}
+                  
+                  <div class="form-group mb-4">
+                     <div class="file-upload-wrapper">
+                        <div class="file-upload-message">
+                           <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+                           <h5 class="mb-2">Drag & drop your images here</h5>
+                           <p class="mb-3 text-muted small">or click to browse files</p>
+                           <label for="{{ form.images.id }}" class="btn btn-outline-primary btn-sm px-4">
+                              <i class="fas fa-folder-open me-2"></i>Browse Files
+                           </label>
+                        </div>
+                        {{ form.images(class="form-control visually-hidden", multiple=True, id="uploadInput") }}
+                     </div>
+                     {% if form.images.errors %}
+                        <div class="invalid-feedback d-block mt-2">
+                           {% for error in form.images.errors %}
+                              <div class="alert alert-danger py-2 px-3">
+                                 <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                              </div>
+                           {% endfor %}
+                        </div>
+                     {% endif %}
+                     <div class="upload-info mt-3">
+                        <div class="d-flex align-items-center">
+                           <i class="fas fa-info-circle me-2 text-primary"></i>
+                           <span class="small text-muted">Supported formats: JPG, PNG, JPEG. Maximum size: 5MB per image.</span>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div id="imagePreview" class="mb-4 row g-3" style="display: none;">
+                     <!-- Image previews will be inserted here by JavaScript -->
+                  </div>
+                  
+                  <div class="d-flex justify-content-between mt-4">
+                     <button type="button" id="clearButton" class="btn btn-outline-secondary" style="display: none;">
+                        <i class="fas fa-times me-2"></i>Clear All
+                     </button>
+                     <div class="ms-auto">
+                        {{ form.submit(class="btn btn-primary btn-lg px-4", id="submitButton", style="display: none;") }}
+                     </div>
+                  </div>
+               </form>
+            </div>
+         </div>
+         
+         <div class="card mt-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-header bg-light d-flex align-items-center">
+               <i class="fas fa-lightbulb text-warning me-3 fa-lg"></i>
+               <h5 class="mb-0">Tips for Great Photos</h5>
+            </div>
+            <div class="card-body">
+               <div class="tips-container">
+                  <div class="tip-item">
+                     <div class="tip-icon">
+                        <i class="fas fa-sun"></i>
+                     </div>
+                     <div class="tip-content">
+                        <h6>Good Lighting</h6>
+                        <p class="small text-muted">Natural light works best to showcase your dish's colors and textures</p>
+                     </div>
+                  </div>
+                  <div class="tip-item">
+                     <div class="tip-icon">
+                        <i class="fas fa-camera"></i>
+                     </div>
+                     <div class="tip-content">
+                        <h6>Multiple Angles</h6>
+                        <p class="small text-muted">Take photos from different perspectives to capture all details</p>
+                     </div>
+                  </div>
+                  <div class="tip-item">
+                     <div class="tip-icon">
+                        <i class="fas fa-carrot"></i>
+                     </div>
+                     <div class="tip-content">
+                        <h6>Show Ingredients</h6>
+                        <p class="small text-muted">Make sure key ingredients are clearly visible for better recognition</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<style>
+   /* Custom styles for upload page */
+   .upload-icon-container {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(56, 178, 172, 0.3);
+   }
+   
+   .file-upload-wrapper {
+      border: 2px dashed #d1d5db;
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      background-color: #f8fafc;
+   }
+   
+   .file-upload-wrapper:hover, .file-upload-wrapper.dragover {
+      border-color: var(--secondary-color);
+      background-color: rgba(56, 178, 172, 0.05);
+   }
+   
+   .file-upload-message {
+      cursor: pointer;
+   }
+   
+   /* Tips styling */
+   .tips-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+   }
+   
+   .tip-item {
+      display: flex;
+      align-items: flex-start;
+      transition: transform 0.3s ease;
+   }
+   
+   .tip-item:hover {
+      transform: translateX(5px);
+   }
+   
+   .tip-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 197, 61, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      color: var(--accent-color);
+      flex-shrink: 0;
+   }
+   
+   .tip-content {
+      flex-grow: 1;
+   }
+   
+   .tip-content h6 {
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+   }
+</style>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+      const uploadInput = document.getElementById('uploadInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const fileUploadWrapper = document.querySelector('.file-upload-wrapper');
+      const fileUploadMessage = document.querySelector('.file-upload-message');
+      const clearButton = document.getElementById('clearButton');
+      const submitButton = document.getElementById('submitButton');
+      
+      // Click on the message area to trigger file input
+      fileUploadMessage.addEventListener('click', function() {
+         uploadInput.click();
+      });
+      
+      // Drag and drop functionality
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+         fileUploadWrapper.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+         e.preventDefault();
+         e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+         fileUploadWrapper.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+         fileUploadWrapper.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+         fileUploadWrapper.classList.add('dragover');
+      }
+      
+      function unhighlight() {
+         fileUploadWrapper.classList.remove('dragover');
+      }
+      
+      fileUploadWrapper.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+         const dt = e.dataTransfer;
+         const files = dt.files;
+         uploadInput.files = files;
+         
+         // Trigger change event
+         const event = new Event('change');
+         uploadInput.dispatchEvent(event);
+      }
+      
+      // Image preview functionality
+      uploadInput.addEventListener('change', function(event) {
+         imagePreview.innerHTML = '';
+         
+         if (this.files && this.files.length > 0) {
+            imagePreview.style.display = 'flex';
+            clearButton.style.display = 'block';
+            submitButton.style.display = 'block';
+            
+            [...this.files].forEach((file, index) => {
+               if (file.type.match('image.*')) {
+                  const reader = new FileReader();
+                  
+                  reader.onload = function(e) {
+                     const col = document.createElement('div');
+                     col.className = 'col-6 col-md-4 col-lg-3';
+                     col.style.opacity = '0';
+                     col.style.transform = 'translateY(20px)';
+                     
+                     setTimeout(() => {
+                        col.style.transition = 'all 0.3s ease';
+                        col.style.opacity = '1';
+                        col.style.transform = 'translateY(0)';
+                     }, 50 * index);
+                     
+                     const card = document.createElement('div');
+                     card.className = 'card h-100 border-0 shadow-sm';
+                     
+                     const imgContainer = document.createElement('div');
+                     imgContainer.style.height = '150px';
+                     imgContainer.style.overflow = 'hidden';
+                     imgContainer.style.borderRadius = 'calc(var(--border-radius) - 2px) calc(var(--border-radius) - 2px) 0 0';
+                     
+                     const img = document.createElement('img');
+                     img.src = e.target.result;
+                     img.className = 'w-100 h-100';
+                     img.style.objectFit = 'cover';
+                     img.style.transition = 'transform 0.3s ease';
+                     
+                     // Add hover effect
+                     imgContainer.addEventListener('mouseenter', () => {
+                        img.style.transform = 'scale(1.05)';
+                     });
+                     
+                     imgContainer.addEventListener('mouseleave', () => {
+                        img.style.transform = 'scale(1)';
+                     });
+                     
+                     imgContainer.appendChild(img);
+                     
+                     const cardBody = document.createElement('div');
+                     cardBody.className = 'card-body p-2';
+                     
+                     const fileName = document.createElement('p');
+                     fileName.className = 'card-text small text-truncate mb-0 fw-semibold';
+                     fileName.textContent = file.name;
+                     
+                     const fileSize = document.createElement('small');
+                     fileSize.className = 'text-muted';
+                     fileSize.textContent = formatFileSize(file.size);
+                     
+                     cardBody.appendChild(fileName);
+                     cardBody.appendChild(fileSize);
+                     
+                     const removeBtn = document.createElement('button');
+                     removeBtn.className = 'btn btn-sm position-absolute top-0 end-0 m-2 bg-white text-danger rounded-circle p-1';
+                     removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                     removeBtn.style.width = '28px';
+                     removeBtn.style.height = '28px';
+                     removeBtn.style.fontSize = '12px';
+                     removeBtn.title = 'Remove image';
+                     
+                     // We can't actually remove the file from the FileList, so this is just visual
+                     removeBtn.addEventListener('click', () => {
+                        col.style.opacity = '0';
+                        col.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                           col.remove();
+                           if (imagePreview.children.length === 0) {
+                              imagePreview.style.display = 'none';
+                              clearButton.style.display = 'none';
+                              submitButton.style.display = 'none';
+                           }
+                        }, 300);
+                     });
+                     
+                     card.appendChild(imgContainer);
+                     card.appendChild(cardBody);
+                     card.appendChild(removeBtn);
+                     col.appendChild(card);
+                     imagePreview.appendChild(col);
+                  }
+                  
+                  reader.readAsDataURL(file);
+               }
+            });
+         } else {
+            imagePreview.style.display = 'none';
+            clearButton.style.display = 'none';
+            submitButton.style.display = 'none';
+         }
+      });
+      
+      // Clear button functionality
+      clearButton.addEventListener('click', function() {
+         uploadInput.value = '';
+         imagePreview.innerHTML = '';
+         imagePreview.style.display = 'none';
+         clearButton.style.display = 'none';
+         submitButton.style.display = 'none';
+      });
+      
+      function formatFileSize(bytes) {
+         if (bytes < 1024) {
+            return bytes + ' bytes';
+         } else if (bytes < 1048576) {
+            return (bytes / 1024).toFixed(1) + ' KB';
+         } else {
+            return (bytes / 1048576).toFixed(1) + ' MB';
+         }
+      }
+   });
+</script>
+{% endblock %}

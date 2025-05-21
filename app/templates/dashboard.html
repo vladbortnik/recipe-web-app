@@ -1,0 +1,326 @@
+<!-- templates/dashboard.html -->
+{% extends "layout.html" %}
+
+{% block title %} Dashboard | Recipe Hub {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  
+  <div class="row mb-4" data-aos="fade-up" data-aos-delay="50">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0"><i class="fas fa-utensils me-2"></i>Your Recipe Dashboard</h3>
+          <span class="badge bg-primary rounded-pill px-3 py-2" style="background: linear-gradient(135deg, var(--secondary-color), #0369a1) !important;">Instructions</span>
+        </div>
+        <div class="card-body">
+          <p class="lead text-center fw-bold my-2">Select ingredients you have on hand, and we'll suggest recipes you can make!</p>
+          <div class="text-center mt-3">
+            <div class="recipe-steps d-inline-flex">
+              <div class="step-item"><i class="fas fa-check-circle me-2"></i>Select ingredients</div>
+              <div class="step-arrow"><i class="fas fa-arrow-right" style="padding-top: 10px;"></i></div>
+              <div class="step-item"><i class="fas fa-search me-2"></i>Find recipes</div>
+              <div class="step-arrow"><i class="fas fa-arrow-right" style="padding-top: 10px;"></i></div>
+              <div class="step-item"><i class="fas fa-utensils me-2"></i>Start cooking</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if products %}
+  <div class="row mb-4" data-aos="fade-up" data-aos-delay="150">
+    <div class="col-12">
+      <div class="card">
+        <!-- <div class="card-header"> -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-carrot me-2"></i>Available Ingredients</h4>
+          <span class="badge bg-primary rounded-pill px-3 py-2">{{ products|length if products else 0 }} Ingredients</span>
+        </div>
+        <div class="card-body">
+          <form id="product-form" method="POST">
+            <div class="grid-container">
+              {% for product in products %}
+                <div class="grid-item" data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 50 }}" data-aos-duration="500">
+                  <label class="btn product-checkbox">
+                    <input type="checkbox" name="product" value="{{ product }}" class="d-none">{{ product }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary btn-lg px-4 py-2" id="submit">
+                <i class="fas fa-search me-2"></i>Find Recipes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="row mb-4" data-aos="fade-up" data-aos-delay="150">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="fas fa-exclamation-circle fa-3x mb-4 text-muted"></i>
+          <h4 class="mb-3">No ingredients available</h4>
+          <p class="text-muted mb-4">There are no ingredients to display at this time.</p>
+          <a href="{{ url_for('upload') }}" class="btn btn-primary">
+            <i class="fas fa-cloud-upload-alt me-2"></i>Upload Food Images
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if recipes %}
+  <div class="row" data-aos="fade-up" data-aos-delay="250">
+    <div class="col-12">
+      <div class="card">
+        <!-- <div class="card-header"> -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-book-open me-2"></i>Recipes You Can Make</h4>
+          <span class="badge bg-primary rounded-pill px-3 py-2" style="background: linear-gradient(135deg, var(--success-color), rgb(29, 129, 3)) !important;">Enjoy Your Meal!</span>
+        </div>
+        <div class="card-body">
+          <ul class="recipe-list">
+            {% for recipe in recipes %}
+              <li class="recipe-item" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
+                {% if recipe.error %}
+                  <i class="fas fa-exclamation-circle recipe-icon text-warning"></i>
+                  <div>
+                    <h5 class="mb-1 fw-bold">{{ recipe.title }}</h5>
+                  </div>
+                {% else %}
+                  <div class="recipe-image">
+                    {% if recipe.image %}
+                      <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded">
+                    {% else %}
+                      <i class="fas fa-utensils recipe-icon"></i>
+                    {% endif %}
+                  </div>
+                  <div class="recipe-content">
+                    <h5 class="mb-1 fw-bold">{{ recipe.title }}</h5>
+                    <div class="d-flex align-items-center mt-2 mb-2">
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-clock me-1"></i> {{ recipe.readyInMinutes|default(30) }} min</span>
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-star me-1"></i> {{ recipe.difficulty|default('Easy') }}</span>
+                      {% if recipe.servings %}
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-users me-1"></i> {{ recipe.servings }} servings</span>
+                      {% endif %}
+                    </div>
+                    
+                    {% if not recipe.legacy %}
+                    <div class="recipe-details mt-2">
+                      <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#recipe-{{ loop.index }}" aria-expanded="false">
+                        <i class="fas fa-info-circle me-1"></i>View Details
+                      </button>
+                      {% if recipe.sourceUrl %}
+                      <a href="{{ recipe.sourceUrl }}" target="_blank" class="btn btn-sm btn-outline-success ms-2">
+                        <i class="fas fa-external-link-alt me-1"></i>Source
+                      </a>
+                      {% endif %}
+                      
+                      <div class="collapse mt-3" id="recipe-{{ loop.index }}">
+                        {% if recipe.summary %}
+                        <div class="card card-body mb-3">
+                          <h6 class="card-subtitle mb-2 text-muted">Summary</h6>
+                          <p class="card-text">{{ recipe.summary|safe }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if recipe.analyzedInstructions and recipe.analyzedInstructions|length > 0 %}
+                        <div class="card card-body">
+                          <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
+                          <ol class="instruction-list">
+                          {% for instruction in recipe.analyzedInstructions[0].steps %}
+                            <li class="mb-2">{{ instruction.step }}</li>
+                          {% endfor %}
+                          </ol>
+                        </div>
+                        {% elif recipe.instructions %}
+                        <div class="card card-body">
+                          <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
+                          <div>{{ recipe.instructions|safe }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if recipe.usedIngredients or recipe.missedIngredients %}
+                        <div class="card card-body mt-3">
+                          <h6 class="card-subtitle mb-2 text-muted">Ingredients</h6>
+                          <div class="row">
+                            {% if recipe.usedIngredients %}
+                            <div class="col-md-6">
+                              <h6><i class="fas fa-check-circle text-success me-1"></i>Ingredients You Have</h6>
+                              <ul class="ingredient-list">
+                                {% for ingredient in recipe.usedIngredients %}
+                                <li>{{ ingredient.original }}</li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if recipe.missedIngredients %}
+                            <div class="col-md-6">
+                              <h6><i class="fas fa-shopping-basket text-warning me-1"></i>Additional Ingredients Needed</h6>
+                              <ul class="ingredient-list">
+                                {% for ingredient in recipe.missedIngredients %}
+                                <li>{{ ingredient.original }}</li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    {% else %}
+                    <small class="text-muted">Using your selected ingredients</small>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const labels = document.querySelectorAll('.product-checkbox');
+    
+    // Handle checkbox selection with enhanced UI feedback
+    labels.forEach(label => label.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent default to handle the toggle manually
+      
+      const checkbox = label.querySelector('input');
+      if (!checkbox.checked) {
+        // Select the ingredient
+        label.classList.add('btn-success');
+        checkbox.checked = true;
+        
+        // Add a subtle animation
+        label.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+          label.style.transform = 'translateY(-2px) scale(1.02)';
+        }, 150);
+      } else {
+        // Deselect the ingredient
+        label.classList.remove('btn-success');
+        checkbox.checked = false;
+        
+        // Reset the style
+        label.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          label.style.transform = '';
+        }, 150);
+      }
+    }));
+    
+    // Add animation to the submit button
+    const submitBtn = document.getElementById('submit');
+    if (submitBtn) {
+      submitBtn.addEventListener('mouseenter', function() {
+        this.querySelector('i').style.transform = 'translateY(-3px) scale(1.2)';
+      });
+      
+      submitBtn.addEventListener('mouseleave', function() {
+        this.querySelector('i').style.transform = '';
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Additional styles for the recipe steps */
+  .recipe-steps {
+    background-color: rgba(56, 178, 172, 0.1);
+    padding: 15px 20px;
+    border-radius: 50px;
+    margin-top: 10px;
+  }
+  
+  .step-item {
+    display: inline-block;
+    padding: 5px 15px;
+    font-weight: 600;
+    color: var(--secondary-color);
+  }
+  
+  .step-arrow {
+    color: var(--secondary-light);
+    margin: 0 5px;
+    animation: pulse 2s infinite;
+  }
+  
+  /* Enhanced recipe list styling */
+  .recipe-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .recipe-item {
+    display: flex;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    background-color: #fff;
+  }
+  
+  .recipe-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .recipe-image {
+    min-width: 150px;
+    max-width: 150px;
+    margin-right: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .recipe-image img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  
+  .recipe-icon {
+    font-size: 3rem;
+    color: var(--secondary-color);
+    margin-right: 20px;
+    opacity: 0.7;
+  }
+  
+  .recipe-content {
+    flex: 1;
+  }
+  
+  .instruction-list {
+    padding-left: 20px;
+  }
+  
+  .ingredient-list {
+    padding-left: 20px;
+    margin-top: 10px;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+  }
+</style>
+{% endblock %}

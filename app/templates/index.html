@@ -1,0 +1,24 @@
+<!-- templates/index.html -->
+{% extends "layout.html" %}
+
+{% block title %} Recipe Hub {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to Recipe Hub!</h1>
+        <p class="lead" style="margin-left: 12px;">COOK WITH WHAT YOU HAVE...</p>
+        <hr class="my-4">
+
+        {% if current_user.is_authenticated %}
+            <p>Welcome back, {{ current_user.email }}! Ready to explore more recipes?</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}" role="button">My Dashboard</a>
+            <a class="btn btn-success btn-lg" href="{{ url_for('upload') }}" role="button">Upload Ingredients</a>
+        {% else %}
+            <p>Sign up for an account or log in to get started.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}" role="button">Sign Up</a>
+            <a class="btn btn-success btn-lg" href="{{ url_for('login') }}" role="button">Log In</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
