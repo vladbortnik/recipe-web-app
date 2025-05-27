@@ -1,4 +1,5 @@
 # PROJECT SPECIFIC
+migrations/
 my_info/
 /app/static/upload_dir/
 

@@ -19,16 +19,24 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
+        # Verify reCAPTCHA
+        recaptcha_response = request.form.get('g-recaptcha-response')
+        if not recaptcha_response:
+            flash('Please complete the reCAPTCHA', 'danger')
+            return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+            
+        from .utils import verify_recaptcha
+        if not verify_recaptcha(recaptcha_response):
+            flash('reCAPTCHA verification failed. Please try again.', 'danger')
+            return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+        
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             # Check if user has verified their email
             if not user.is_verified:
-                # Display message with a button to manually request verification email
-                # Using safe filter in template to render HTML properly
                 flash('Please verify your email address before logging in. Check your inbox for the verification link.', 'warning')
-                # Store user ID in session to allow them to request a new verification email
                 session['unverified_user_id'] = user.id  
-                return render_template('login.html', form=form, show_resend=True, user_id=user.id)
+                return render_template('login.html', form=form, show_resend=True, user_id=user.id, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
             
             login_user(user, remember=form.remember.data)
             flash('You have been logged in', 'success')
@@ -37,7 +45,7 @@ def login():
         else:
             flash('Login failed. Please check email and password.', 'danger')
             
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -47,6 +55,17 @@ def signup():
     
     form = SignupForm()
     if form.validate_on_submit():
+        # Verify reCAPTCHA
+        recaptcha_response = request.form.get('g-recaptcha-response')
+        if not recaptcha_response:
+            flash('Please complete the reCAPTCHA', 'danger')
+            return render_template('signup.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+            
+        from .utils import verify_recaptcha
+        if not verify_recaptcha(recaptcha_response):
+            flash('reCAPTCHA verification failed. Please try again.', 'danger')
+            return render_template('signup.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+        
         email = form.email.data
         if email and User.query.filter_by(email=email).first() and not User.query.filter_by(email=email).first().is_verified:
             flash('Please verify your email address before logging in. Check your inbox for the verification link.', 'warning')
@@ -66,7 +85,7 @@ def signup():
             flash('Your account has been created. Please check your email to verify your account.', 'success')
             return redirect(url_for('login'))
         
-    return render_template('signup.html', form=form)
+    return render_template('signup.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
 
 @app.route('/resend-verification/<int:user_id>')
 def resend_verification(user_id):

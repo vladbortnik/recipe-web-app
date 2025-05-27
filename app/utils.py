@@ -7,9 +7,10 @@ from . import db
 from .models import ImgSet, Recipe
 import uuid, os
 import datetime
-from flask import url_for, current_app
+from flask import url_for, current_app, jsonify, request
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
+import requests
 from . import mail
 
 # helper function for 'retrieve_product_labels()'
@@ -183,6 +184,44 @@ def calculate_token_expiry():
     """Calculate token expiration timestamp"""
     hours = int(current_app.config.get('VERIFICATION_TOKEN_EXPIRY', 24))
     return datetime.datetime.now() + datetime.timedelta(hours=hours)
+
+def verify_recaptcha(recaptcha_response):
+    """
+    Verify reCAPTCHA v2 response with Google's API
+    
+    Args:
+        recaptcha_response (str): The reCAPTCHA response token from the client
+        
+    Returns:
+        bool: True if verification is successful, False otherwise
+    """
+    if not recaptcha_response:
+        return False
+        
+    data = {
+        'secret': current_app.config['RECAPTCHA_SECRET_KEY'],
+        'response': recaptcha_response,
+        'remoteip': request.remote_addr  # Optional: include user's IP for additional security
+    }
+    
+    try:
+        response = requests.post(
+            current_app.config['RECAPTCHA_VERIFY_URL'],
+            data=data,
+            timeout=5  # Add timeout to prevent hanging
+        )
+        result = response.json()
+        
+        # Log the response for debugging (remove in production or reduce to debug level)
+        current_app.logger.debug(f"reCAPTCHA verification response: {result}")
+        
+        # For v2, we only need to check the 'success' field
+        return result.get('success', False)
+        
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"reCAPTCHA verification request failed: {str(e)}")
+        # In case of network errors, you might want to fail open or closed based on your security requirements
+        return False  # Failing closed for security
 
 def send_verification_email(user):
     """Send verification email to user"""

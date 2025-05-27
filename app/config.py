@@ -26,7 +26,7 @@ class Config:
     # Email verification settings
     VERIFICATION_TOKEN_EXPIRY = os.getenv('VERIFICATION_TOKEN_EXPIRY', 24)  # Hours
     
-    # reCAPTCHA configuration
+    # reCAPTCHA v2 configuration
     RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY')
     RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
