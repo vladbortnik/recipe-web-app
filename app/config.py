@@ -13,6 +13,17 @@ class Config:
     AZURE_COMPUTERVISION_KEY = os.getenv('AZURE_COMPUTERVISION_KEY')
     AZURE_COMPUTERVISION_ENDPOINT = os.getenv('AZURE_COMPUTERVISION_ENDPOINT')
     SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY')
+
+    # Session & Cookie Security
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
+    WTF_CSRF_SSL_STRICT = True
+    SESSION_COOKIE_SECURE = True
+    
     
     # Flask-Mail configuration
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.fastmail.com')

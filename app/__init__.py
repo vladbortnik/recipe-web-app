@@ -15,6 +15,11 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 mail = Mail()
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
@@ -26,6 +31,7 @@ def create_app():
     login_manager.login_view = "login"
     login_manager.login_message_category = "info"
     mail.init_app(app)
+    limiter.init_app(app)
 
     from .models import User
 

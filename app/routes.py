@@ -12,7 +12,10 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 def index():
     return render_template('index.html')
 
+from . import limiter
+
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
@@ -32,23 +35,23 @@ def login():
             return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
         
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            # Check if user has verified their email
-            if not user.is_verified:
-                flash('Please verify your email address before logging in. Check your inbox for the verification link.', 'warning')
-                session['unverified_user_id'] = user.id  
-                return render_template('login.html', form=form, show_resend=True, user_id=user.id, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
-            
-            login_user(user, remember=form.remember.data)
-            flash('You have been logged in', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
-        else:
-            flash('Login failed. Please check email and password.', 'danger')
-            
+        if not user or not bcrypt.check_password_hash(user.password, form.password.data):
+            flash('Invalid email or password.', 'danger')
+            return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+        # Check if user has verified their email
+        if not user.is_verified:
+            flash('Please verify your email address before logging in. Check your inbox for the verification link.', 'warning')
+            session['unverified_user_id'] = user.id  
+            return render_template('login.html', form=form, show_resend=True, user_id=user.id, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
+        login_user(user, remember=form.remember.data)
+        flash('You have been logged in', 'success')
+        next_page = request.args.get('next')
+        return redirect(next_page) if next_page else redirect(url_for('index'))
+
     return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
 
 @app.route('/signup', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def signup():
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
@@ -205,6 +208,7 @@ def dashboard():
 
 # --- Password Reset Request (Forgot Password) ---
 @app.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def forgot_password():
     form = ForgotPasswordForm()
     if form.validate_on_submit():
@@ -227,6 +231,7 @@ def my_account():
 
 @app.route('/send-password-reset', methods=['POST'])
 @login_required
+@limiter.limit("3 per minute")
 def send_password_reset():
     from .utils import reset_password
     success = reset_password(current_user)
@@ -237,6 +242,7 @@ def send_password_reset():
     return redirect(url_for('my_account'))
 
 @app.route('/password-reset/<token>', methods=['GET', 'POST'])
+@limiter.limit("3 per minute")
 def password_reset(token):
     form = PasswordResetForm()
     recaptcha_site_key = app.config['RECAPTCHA_SITE_KEY']
