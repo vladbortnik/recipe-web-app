@@ -3,9 +3,10 @@ from flask import current_app as app
 from flask import request, render_template, redirect, url_for, flash, session, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from . import db, bcrypt
-from .forms import LoginForm, SignupForm, UploadImageForm
+from .forms import LoginForm, SignupForm, UploadImageForm, PasswordResetForm, EmptyForm, ForgotPasswordForm
 from .models import User, ImgSet
 from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_user_recipes, send_verification_email, verify_token
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 @app.route('/')
 def index():
@@ -201,3 +202,64 @@ def dashboard():
             recipes = fetch_user_recipes()
     
     return render_template('dashboard.html', products=products, recipes=recipes)
+
+# --- Password Reset Request (Forgot Password) ---
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        from .models import User
+        from .utils import reset_password
+        user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+        # Always show the same message for privacy
+        if user:
+            reset_password(user)
+        flash('If an account exists for this email, a password reset link has been sent.', 'info')
+        return redirect(url_for('login'))
+    return render_template('forgot-password.html', form=form)
+
+# --- My Account & Password Reset Routes ---
+@app.route('/my-account')
+@login_required
+def my_account():
+    form = EmptyForm()
+    return render_template('my-account.html', form=form)
+
+@app.route('/send-password-reset', methods=['POST'])
+@login_required
+def send_password_reset():
+    from .utils import reset_password
+    success = reset_password(current_user)
+    if success:
+        flash('A password reset link has been sent to your email.', 'success')
+    else:
+        flash('Failed to send password reset email. Please try again later.', 'danger')
+    return redirect(url_for('my_account'))
+
+@app.route('/password-reset/<token>', methods=['GET', 'POST'])
+def password_reset(token):
+    form = PasswordResetForm()
+    recaptcha_site_key = app.config['RECAPTCHA_SITE_KEY']
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+    except (SignatureExpired, BadSignature):
+        flash('The password reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('login'))
+    user = User.query.filter_by(email=email).first()
+    if not user or user.verification_token != token:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('login'))
+    if form.validate_on_submit():
+        recaptcha_response = request.form.get('g-recaptcha-response')
+        from .utils import verify_recaptcha
+        if not recaptcha_response or not verify_recaptcha(recaptcha_response):
+            flash('reCAPTCHA verification failed. Please try again.', 'danger')
+            return render_template('password-reset.html', form=form, recaptcha_site_key=recaptcha_site_key)
+        user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user.verification_token = None
+        user.token_expiration = None
+        db.session.commit()
+        flash('Your password has been reset. Please log in.', 'success')
+        return redirect(url_for('login'))
+    return render_template('password-reset.html', form=form, recaptcha_site_key=recaptcha_site_key)

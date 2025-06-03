@@ -180,9 +180,10 @@ def verify_token(token, expiration=86400):  # 24 hours in seconds
     except:
         return None
 
-def calculate_token_expiry():
+def calculate_token_expiry(hours=None):
     """Calculate token expiration timestamp"""
-    hours = int(current_app.config.get('VERIFICATION_TOKEN_EXPIRY', 24))
+    if hours is None:
+        hours = int(current_app.config.get('VERIFICATION_TOKEN_EXPIRY', 24))
     return datetime.datetime.now() + datetime.timedelta(hours=hours)
 
 def verify_recaptcha(recaptcha_response):
@@ -255,3 +256,41 @@ Recipe Hub Team
     mail.send(msg)
     
     return True
+
+def reset_password(user):
+    """
+    Send a password reset email to the user with a secure token link.
+    Returns True if the email was sent successfully, False otherwise.
+    """
+    try:
+        # Generate a secure token for password reset
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        token = serializer.dumps(user.email, salt='password-reset-salt')
+        
+        # Store token and expiration in user record (optional, for extra security)
+        user.verification_token = token
+        user.token_expiration = calculate_token_expiry(hours=1)  # e.g., 1 hour expiry for reset
+        db.session.commit()
+
+        # Create password reset URL
+        reset_url = url_for('password_reset', token=token, _external=True)
+        
+        # Compose and send email
+        subject = "Reset Your Password"
+        body = f"""Hello,
+
+You requested a password reset for your Recipe Hub account. To reset your password, click the link below:
+
+{reset_url}
+
+This link will expire in 1 hour. If you did not request a password reset, please ignore this email.
+
+Regards,
+Recipe Hub Team
+"""
+        msg = Message(subject, recipients=[user.email], body=body)
+        mail.send(msg)
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Failed to send password reset email: {e}")
+        return False

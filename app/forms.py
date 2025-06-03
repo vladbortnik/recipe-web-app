@@ -23,3 +23,21 @@ class UploadImageForm(FlaskForm):
     images = MultipleFileField('Upload Images:', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!'), 
                                                         DataRequired(message='Please select at least one image')])
     submit = SubmitField('Upload')
+
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('New Password', validators=[
+        DataRequired(message='Password is required'),
+        Length(min=8, max=29, message='Password must be between 8 and 29 characters')
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(message='Please confirm your password'),
+        EqualTo('password', message='Passwords must match')
+    ])
+    submit = SubmitField('Reset Password')
+
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Send Reset Link')
