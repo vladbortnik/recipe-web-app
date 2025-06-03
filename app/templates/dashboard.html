@@ -3,31 +3,31 @@
 {% block title %}Dashboard | Recipe Hub{% endblock %}
 
 {% block content %}
-<div class="container py-3 py-lg-5">
+<div class="container py-4 py-lg-5">
   <!-- Combined Welcome Card with Stats -->
-  <section class="welcome-section py-3 py-lg-5">
+  <section class="welcome-section py-4 py-lg-5">
     <div class="container">
-      <div class="row align-items-center justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-7 mb-5 mb-lg-0" data-aos="fade-right">
+      <div class="row align-items-center">
+        <div class="col-lg-8 mb-5 mb-lg-0" data-aos="fade-right">
           <h1 class="display-5 fw-bold mb-3">Welcome back, {{ current_user.first_name or 'Chef' }}!</h1>
           <p class="lead text-muted mb-4">Let's get inspired and cook something amazing today.</p>
           
-          <div class="d-flex flex-column flex-sm-row gap-3 mb-4 w-100">
+          <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
             <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4">
               <i class="fas fa-cloud-upload-alt me-2"></i>Upload Ingredients
             </a>
           </div>
           
-          <div class="quick-stats d-flex flex-column flex-sm-row flex-wrap gap-3 gap-sm-4 mt-4 w-100">
-            <div class="stat-item flex-fill mb-2 mb-sm-0">
+          <div class="quick-stats d-flex flex-wrap gap-4 mt-4">
+            <div class="stat-item">
               <div class="h3 mb-0 text-primary">{{ recipes|length if recipes else 0 }}</div>
               <div class="text-muted">Recipes</div>
             </div>
-            <div class="stat-item flex-fill mb-2 mb-sm-0">
+            <div class="stat-item">
               <div class="h3 mb-0 text-success">{{ products|length if products else 0 }}</div>
               <div class="text-muted">Ingredients</div>
             </div>
-            <div class="stat-item flex-fill mb-2 mb-sm-0">
+            <div class="stat-item">
               <div class="h3 mb-0 text-warning">{{ favorites|length if favorites else 0 }}</div>
               <div class="text-muted">Favorites</div>
             </div>
@@ -35,11 +35,11 @@
         </div>
         
         <div class="col-lg-4" data-aos="fade-left">
-          <div class="card border-0 shadow-lg rounded-3 overflow-hidden h-100 mt-4 mt-lg-0">
+          <div class="card border-0 shadow-lg rounded-3 overflow-hidden h-100">
             <div class="card-body p-4">
               <h3 class="h5 mb-3">Quick Actions</h3>
               <div class="list-group list-group-flush">
-                <a href="{{ url_for('upload') }}" class="list-group-item border-0 px-0 py-3 text-decoration-none w-100">
+                <a href="{{ url_for('upload') }}" class="list-group-item border-0 px-0 py-3 text-decoration-none">
                   <div class="d-flex align-items-center">
                     <div class="icon-wrapper-sm bg-soft-primary text-primary rounded-circle me-3">
                       <i class="fas fa-cloud-upload-alt"></i>
@@ -93,7 +93,7 @@
         </span>
       </div>
       
-      <div class="card border-0 shadow-sm w-100">
+      <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
           <form id="product-form" method="POST">
             <div class="ingredients-grid">
@@ -136,7 +136,7 @@
         <div class="card-body">
           <ul class="recipe-list">
             {% for recipe in recipes %}
-              <li class="recipe-item dashboard-card-col w-100" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
+              <li class="recipe-item" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
                 {% if recipe.error %}
                   <i class="fas fa-exclamation-circle recipe-icon text-warning"></i>
                   <div>

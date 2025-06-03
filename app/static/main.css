@@ -323,6 +323,43 @@ h4 { font-size: 1.5rem; }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+    .dashboard-card-mobile {
+        min-height: 180px;
+        min-width: 0;
+        width: 100vw;
+        max-width: 98vw;
+        margin-left: -8px;
+        margin-right: -8px;
+        border-radius: 1.2rem;
+        padding: 2.2rem 1.2rem 1.8rem 1.2rem;
+        font-size: 1.19rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dashboard-card-mobile .card-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin-bottom: 2.2rem;
+        word-break: break-word;
+        white-space: normal;
+        width: 100%;
+    }
+    .dashboard-card-mobile .btn {
+        font-size: 1.13rem;
+        padding: 0.85rem 0;
+        border-radius: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        margin-top: auto;
+    }
+    .dashboard-card-mobile .collapse {
+        width: 100%;
+        margin-top: 1.5rem;
+    }
+
     .card,
     .card-body,
     .card-title,
