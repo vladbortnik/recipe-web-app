@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # This instruction only serves as documentation
 # It does not actually publish the port to the host machine
-EXPOSE 5001
+EXPOSE 5002
 
 # Permissions
 # RUN chmod +x /code/scripts/wait-for-migrations.sh
