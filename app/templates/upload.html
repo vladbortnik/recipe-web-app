@@ -1,185 +1,251 @@
-<!-- templates/upload.html -->
 {% extends "layout.html" %}
 
-{% block title %} Upload | Recipe Hub {% endblock %}
+{% block title %}Upload Ingredients | Recipe Hub{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-   <div class="row">
-      <div class="col-lg-8 mx-auto" data-aos="fade-up" data-aos-duration="800">
-         <div class="card">
-            <div class="card-header">
-               <h4 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>Upload Ingredients</h4>
+<div class="container py-5 py-lg-7">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9" data-aos="fade-up" data-aos-duration="800">
+            <!-- Upload Section Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h1 mb-0">
+                    <i class="fas fa-cloud-upload-alt text-primary me-2"></i>Upload Your Ingredients
+                </h2>
+                <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">
+                    <i class="fas fa-upload me-1"></i> New Ingredients
+                </span>
             </div>
-            <div class="card-body">
-               <div class="text-center mb-4">
-                  <div class="upload-icon-container mb-3">
-                     <i class="fas fa-camera fa-3x"></i>
-                  </div>
-                  <p class="lead fw-bold">Share your cooking creations by uploading images of your dishes</p>
-                  <p class="text-muted">We'll extract ingredients and help suggest recipes you can make!</p>
-               </div>
-               
-               <form method="POST" enctype="multipart/form-data" class="p-md-4 p-3">
-                  {{ form.hidden_tag() }}
-                  
-                  <div class="form-group mb-4">
-                     <div class="file-upload-wrapper">
-                        <div class="file-upload-message">
-                           <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
-                           <h5 class="mb-2">Drag & drop your images here</h5>
-                           <p class="mb-3 text-muted small">or click to browse files</p>
-                           <label for="{{ form.images.id }}" class="btn btn-outline-primary btn-sm px-4">
-                              <i class="fas fa-folder-open me-2"></i>Browse Files
-                           </label>
+            
+            <!-- Main Upload Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="text-center py-3">
+                        <div class="upload-icon-container mx-auto mb-3">
+                            <i class="fas fa-file-upload fa-2x"></i>
                         </div>
-                        {{ form.images(class="form-control visually-hidden", multiple=True, id="uploadInput") }}
-                     </div>
-                     {% if form.images.errors %}
-                        <div class="invalid-feedback d-block mt-2">
-                           {% for error in form.images.errors %}
-                              <div class="alert alert-danger py-2 px-3">
-                                 <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                              </div>
-                           {% endfor %}
+                        <h3 class="h3 mb-2">Share Your Culinary Creations</h3>
+                        <p class="text-muted mb-3">Upload images of your products and we'll help you create a beautiful recipe.</p>
+                    </div>
+                    
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="file-upload-wrapper mb-4" data-aos="fade-up" data-aos-delay="100">
+                            <div class="file-upload-message p-5 text-center">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h4 class="h5 mb-2">Drag & drop your images here</h4>
+                                <p class="text-muted small mb-4">or click to browse your files</p>
+                                <label for="{{ form.images.id }}" class="btn btn-primary px-4">
+                                    <i class="fas fa-folder-open me-2"></i>Select Images
+                                </label>
+                                {{ form.images(class="form-control visually-hidden", multiple=True, id="uploadInput") }}
+                            </div>
+                            
+                            {% if form.images.errors %}
+                                <div class="invalid-feedback d-block mt-3">
+                                    {% for error in form.images.errors %}
+                                        <div class="alert alert-danger py-2 px-3 d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            <span>{{ error }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="text-center mt-3">
+                                <p class="small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Supported formats: JPG, PNG, JPEG. Maximum size: 5MB per image.
+                                </p>
+                            </div>
                         </div>
-                     {% endif %}
-                     <div class="upload-info mt-3">
-                        <div class="d-flex align-items-center">
-                           <i class="fas fa-info-circle me-2 text-primary"></i>
-                           <span class="small text-muted">Supported formats: JPG, PNG, JPEG. Maximum size: 5MB per image.</span>
+                        
+                        <div id="imagePreview" class="row g-3 mb-4" style="display: none;">
+                            <!-- Image previews will be inserted here by JavaScript -->
                         </div>
-                     </div>
-                  </div>
-                  
-                  <div id="imagePreview" class="mb-4 row g-3" style="display: none;">
-                     <!-- Image previews will be inserted here by JavaScript -->
-                  </div>
-                  
-                  <div class="d-flex justify-content-between mt-4">
-                     <button type="button" id="clearButton" class="btn btn-outline-secondary" style="display: none;">
-                        <i class="fas fa-times me-2"></i>Clear All
-                     </button>
-                     <div class="ms-auto">
-                        {{ form.submit(class="btn btn-primary btn-lg px-4", id="submitButton", style="display: none;") }}
-                     </div>
-                  </div>
-               </form>
+                        
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4 pt-3">
+                            <button type="button" id="clearButton" class="btn btn-outline-secondary mb-3 mb-sm-0" style="display: none;">
+                                <i class="fas fa-times me-2"></i>Clear All
+                            </button>
+                            {{ form.submit(class="btn btn-primary px-4 ms-sm-auto", id="submitButton", style="display: none;") }}
+                        </div>
+                    </form>
+                </div>
             </div>
-         </div>
-         
-         <div class="card mt-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="card-header bg-light d-flex align-items-center">
-               <i class="fas fa-lightbulb text-warning me-3 fa-lg"></i>
-               <h5 class="mb-0">Tips for Great Photos</h5>
+            
+            <!-- Tips Section Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-4" data-aos="fade-up" data-aos-delay="150">
+                <h2 class="h3 mb-0">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>Tips for Great Recipe Photos
+                </h2>
             </div>
-            <div class="card-body">
-               <div class="tips-container">
-                  <div class="tip-item">
-                     <div class="tip-icon">
-                        <i class="fas fa-sun"></i>
-                     </div>
-                     <div class="tip-content">
-                        <h6>Good Lighting</h6>
-                        <p class="small text-muted">Natural light works best to showcase your dish's colors and textures</p>
-                     </div>
-                  </div>
-                  <div class="tip-item">
-                     <div class="tip-icon">
-                        <i class="fas fa-camera"></i>
-                     </div>
-                     <div class="tip-content">
-                        <h6>Multiple Angles</h6>
-                        <p class="small text-muted">Take photos from different perspectives to capture all details</p>
-                     </div>
-                  </div>
-                  <div class="tip-item">
-                     <div class="tip-icon">
-                        <i class="fas fa-carrot"></i>
-                     </div>
-                     <div class="tip-content">
-                        <h6>Show Ingredients</h6>
-                        <p class="small text-muted">Make sure key ingredients are clearly visible for better recognition</p>
-                     </div>
-                  </div>
-               </div>
+            
+            <!-- Tips Card -->
+            <div class="card border-0 shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="d-flex">
+                                <div class="me-3 text-warning">
+                                    <i class="fas fa-sun fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="h6 mb-1">Good Lighting</h4>
+                                    <p class="small text-muted mb-0" style="font-size: 0.85rem;">Use natural light to showcase your dish's true colors and textures.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex">
+                                <div class="me-3 text-warning">
+                                    <i class="fas fa-camera fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="h6 mb-1">Multiple Angles</h4>
+                                    <p class="small text-muted mb-0" style="font-size: 0.85rem;">Capture different perspectives to highlight all the details.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex">
+                                <div class="me-3 text-warning">
+                                    <i class="fas fa-carrot fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="h6 mb-1">Show Ingredients</h4>
+                                    <p class="small text-muted mb-0" style="font-size: 0.85rem;">Make sure key ingredients are clearly visible.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-         </div>
-      </div>
-   </div>
+        </div>
+        </div>
+    </div>
 </div>
 
 <style>
-   /* Custom styles for upload page */
-   .upload-icon-container {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto;
-      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 10px 15px -3px rgba(56, 178, 172, 0.3);
-   }
-   
-   .file-upload-wrapper {
-      border: 2px dashed #d1d5db;
-      border-radius: var(--border-radius);
-      padding: 2rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      background-color: #f8fafc;
-   }
-   
-   .file-upload-wrapper:hover, .file-upload-wrapper.dragover {
-      border-color: var(--secondary-color);
-      background-color: rgba(56, 178, 172, 0.05);
-   }
-   
-   .file-upload-message {
-      cursor: pointer;
-   }
-   
-   /* Tips styling */
-   .tips-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-   }
-   
-   .tip-item {
-      display: flex;
-      align-items: flex-start;
-      transition: transform 0.3s ease;
-   }
-   
-   .tip-item:hover {
-      transform: translateX(5px);
-   }
-   
-   .tip-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(255, 197, 61, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 1rem;
-      color: var(--accent-color);
-      flex-shrink: 0;
-   }
-   
-   .tip-content {
-      flex-grow: 1;
-   }
-   
-   .tip-content h6 {
-      margin-bottom: 0.25rem;
-      font-weight: 700;
-   }
+/* Upload Page Specific Styles */
+.upload-icon-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 20px -5px rgba(79, 70, 229, 0.2);
+    transition: all 0.3s ease;
+}
+
+.upload-icon-container:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.3);
+}
+
+.upload-icon-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.3);
+}
+
+.file-upload-wrapper {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: var(--gray-100);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.file-upload-wrapper:hover, 
+.file-upload-wrapper.dragover {
+    border-color: var(--primary-color);
+    background-color: rgba(79, 70, 229, 0.03);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.file-upload-message {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+/* Image Preview Styles */
+.preview-container {
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 180px;
+}
+
+.preview-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 1rem;
+    color: white;
+    font-size: 0.85rem;
+}
+
+.preview-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--danger-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preview-remove:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .upload-icon-container {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .file-upload-wrapper {
+        padding: 1.5rem 1rem;
+    }
+    
+    .preview-container {
+        height: 150px;
+    }
+}
 </style>
 
 <script>
