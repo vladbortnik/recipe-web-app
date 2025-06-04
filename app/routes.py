@@ -4,13 +4,47 @@ from flask import request, render_template, redirect, url_for, flash, session, a
 from flask_login import login_user, current_user, logout_user, login_required
 from . import db, bcrypt
 from .forms import LoginForm, SignupForm, UploadImageForm, PasswordResetForm, EmptyForm, ForgotPasswordForm
-from .models import User, ImgSet
+from .models import User, ImgSet, Recipe, Favorite
 from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_user_recipes, send_verification_email, verify_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# @app.route('/favorite/<int:recipe_id>', methods=['POST'])
+# @login_required
+# def favorite_recipe(recipe_id):
+#     recipe = Recipe.query.get_or_404(recipe_id)
+#     existing = Favorite.query.filter_by(user_id=current_user.id, recipe_id=recipe.id).first()
+#     if not existing:
+#         fav = Favorite(user_id=current_user.id, recipe_id=recipe.id)
+#         db.session.add(fav)
+#         db.session.commit()
+#         flash('Recipe added to favorites!', 'success')
+#     else:
+#         flash('Recipe already in favorites.', 'info')
+#     return redirect(request.referrer or url_for('dashboard'))
+
+# @app.route('/unfavorite/<int:recipe_id>', methods=['POST'])
+# @login_required
+# def unfavorite_recipe(recipe_id):
+#     recipe = Recipe.query.get_or_404(recipe_id)
+#     fav = Favorite.query.filter_by(user_id=current_user.id, recipe_id=recipe.id).first()
+#     if fav:
+#         db.session.delete(fav)
+#         db.session.commit()
+#         flash('Recipe removed from favorites.', 'success')
+#     else:
+#         flash('Recipe was not in favorites.', 'info')
+#     return redirect(request.referrer or url_for('dashboard'))
+
+# @app.route('/favorites')
+# @login_required
+# def favorites():
+#     favorites = Favorite.query.filter_by(user_id=current_user.id).all()
+#     recipes = [fav.recipe for fav in favorites]
+#     return render_template('favorites.html', recipes=recipes)
 
 from . import limiter
 

@@ -943,7 +943,7 @@ main {
 .recipe-item {
     display: flex;
     align-items: flex-start;
-    padding: 20px;
+    padding: 0px 25px;
     border-bottom: 1px solid #e2e8f0;
     transition: var(--transition-base);
     border-radius: var(--border-radius);

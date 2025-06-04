@@ -30,3 +30,13 @@ class Recipe(db.Model):
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     
     user = db.relationship('User', backref=db.backref('recipes', lazy=True))
+
+class Favorite(db.Model):
+    __tablename__ = 'favorites'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    __table_args__ = (db.UniqueConstraint('user_id', 'recipe_id', name='_user_recipe_uc'),)
+
+    user = db.relationship('User', backref=db.backref('favorites', lazy=True))
+    recipe = db.relationship('Recipe', backref=db.backref('favorited_by', lazy=True))

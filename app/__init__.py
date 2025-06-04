@@ -20,6 +20,8 @@ from flask_limiter.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address)
 
+from flask_wtf.csrf import generate_csrf
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
@@ -33,6 +35,10 @@ def create_app():
     mail.init_app(app)
     limiter.init_app(app)
 
+    @app.context_processor
+    def inject_csrf_token():
+        return dict(csrf_token=generate_csrf)
+
     from .models import User
 
     @login_manager.user_loader
@@ -42,5 +48,8 @@ def create_app():
     with app.app_context():
         # Import routes
         from . import routes
+        print("--- Flask URL Map --- ")
+        print(app.url_map)
+        print("--- End Flask URL Map ---")
 
     return app

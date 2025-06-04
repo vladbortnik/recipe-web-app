@@ -11,13 +11,11 @@
         <div class="col-lg-8 mb-5 mb-lg-0" data-aos="fade-right">
           <h1 class="display-5 fw-bold mb-3">Welcome back, {{ current_user.first_name or 'Chef' }}!</h1>
           <p class="lead text-muted mb-4">Let's get inspired and cook something amazing today.</p>
-          
           <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
             <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4">
               <i class="fas fa-cloud-upload-alt me-2"></i>Upload Ingredients
             </a>
           </div>
-          
           <div class="quick-stats d-flex flex-wrap gap-4 mt-4">
             <div class="stat-item">
               <div class="h3 mb-0 text-primary">{{ recipes|length if recipes else 0 }}</div>
@@ -32,8 +30,14 @@
               <div class="text-muted">Favorites</div>
             </div>
           </div>
+          <div class="mt-3">
+            <a href="#recipes-section" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
+              id="show-favs-btn" style="gap: 0.25rem;">
+              <i class="far fa-bookmark"></i>
+              <span>Favorites</span>
+            </a>
+          </div>
         </div>
-        
         <div class="col-lg-4" data-aos="fade-left">
           <div class="card border-0 shadow-lg rounded-3 overflow-hidden h-100">
             <div class="card-body p-4">
@@ -92,18 +96,19 @@
           {{ products|length if products else 0 }} Ingredients
         </span>
       </div>
-      
+
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
           <form id="product-form" method="POST">
             <div class="ingredients-grid">
               {% for product in products %}
-                <div class="ingredient-item">
-                  <input type="checkbox" name="product" value="{{ product }}" id="product-{{ loop.index }}" class="ingredient-checkbox">
-                  <label for="product-{{ loop.index }}" class="ingredient-label">
-                    <span class="ingredient-name">{{ product }}</span>
-                  </label>
-                </div>
+              <div class="ingredient-item">
+                <input type="checkbox" name="product" value="{{ product }}" id="product-{{ loop.index }}"
+                  class="ingredient-checkbox">
+                <label for="product-{{ loop.index }}" class="ingredient-label">
+                  <span class="ingredient-name">{{ product }}</span>
+                </label>
+              </div>
               {% endfor %}
             </div>
             <div class="text-center mt-4">
@@ -117,7 +122,7 @@
     </div>
   </section>
   {% endif %}
-  
+
   <!-- Recipes Section -->
   {% if recipes %}
   <section id="recipes-section" class="py-4 py-lg-5" data-aos="fade-up" data-aos-delay="150">
@@ -130,130 +135,135 @@
           {{ recipes|length }} Available
         </span>
       </div>
-      
+
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-        <div class="card-body">
           <ul class="recipe-list">
             {% for recipe in recipes %}
-              <li class="recipe-item" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
-                {% if recipe.error %}
-                  <i class="fas fa-exclamation-circle recipe-icon text-warning"></i>
-                  <div>
-                    <h5 class="mb-1 fw-bold">{{ recipe.title }}</h5>
-                  </div>
-                {% else %}
+            <li class="recipe-item position-relative" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
+              <a href="#null" class="position-absolute top-0 end-0 m-2 text-secondary" style="z-index:2;">
+                <button class="btn btn-sm btn-outline-secondary" tabindex="-1" style="margin: 4px;">
+                  <i class="far fa-bookmark"></i>
+                </button>
+              </a>
+              <div class="row g-0 align-items-center">
+                <div class="col-md-3">
                   <div class="recipe-image">
                     {% if recipe.image %}
-                      <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded">
+                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded">
                     {% else %}
-                      <i class="fas fa-utensils recipe-icon"></i>
+                    <i class="fas fa-utensils recipe-icon"></i>
                     {% endif %}
                   </div>
-                  <div class="recipe-content">
+                </div>
+                <div class="col-md-9">
+                  <div class="recipe-content ps-md-4">
                     <h5 class="mb-1 fw-bold">{{ recipe.title }}</h5>
                     <div class="d-flex align-items-center mt-2 mb-2">
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-clock me-1"></i> {{ recipe.readyInMinutes|default(30) }} min</span>
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-star me-1"></i> {{ recipe.difficulty|default('Easy') }}</span>
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-clock me-1"></i> {{
+                        recipe.readyInMinutes|default(30) }} min</span>
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-star me-1"></i> {{
+                        recipe.difficulty|default('Easy') }}</span>
                       {% if recipe.servings %}
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-users me-1"></i> {{ recipe.servings }} servings</span>
+                      <span class="badge bg-light text-dark me-2"><i class="fas fa-users me-1"></i> {{ recipe.servings
+                        }} servings</span>
                       {% endif %}
                     </div>
-                    
-                    {% if not recipe.legacy %}
-                    <div class="recipe-details mt-2">
-                      <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#recipe-{{ loop.index }}" aria-expanded="false">
-                        <i class="fas fa-info-circle me-1"></i>View Details
-                      </button>
-                      {% if recipe.sourceUrl %}
-                      <a href="{{ recipe.sourceUrl }}" target="_blank" class="btn btn-sm btn-outline-success ms-2">
-                        <i class="fas fa-external-link-alt me-1"></i>Source
-                      </a>
-                      {% endif %}
-                      
-                      <div class="collapse mt-3" id="recipe-{{ loop.index }}">
-                        {% if recipe.summary %}
-                        <div class="card card-body mb-3">
-                          <h6 class="card-subtitle mb-2 text-muted">Summary</h6>
-                          <p class="card-text">{{ recipe.summary|safe }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if recipe.analyzedInstructions and recipe.analyzedInstructions|length > 0 %}
-                        <div class="card card-body">
-                          <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
-                          <ol class="instruction-list">
-                          {% for instruction in recipe.analyzedInstructions[0].steps %}
-                            <li class="mb-2">{{ instruction.step }}</li>
-                          {% endfor %}
-                          </ol>
-                        </div>
-                        {% elif recipe.instructions %}
-                        <div class="card card-body">
-                          <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
-                          <div>{{ recipe.instructions|safe }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if recipe.usedIngredients or recipe.missedIngredients %}
-                        <div class="card card-body mt-3">
-                          <h6 class="card-subtitle mb-2 text-muted">Ingredients</h6>
-                          <div class="row">
-                            {% if recipe.usedIngredients %}
-                            <div class="col-md-6">
-                              <h6><i class="fas fa-check-circle text-success me-1"></i>Ingredients You Have</h6>
-                              <ul class="ingredient-list">
-                                {% for ingredient in recipe.usedIngredients %}
-                                <li>{{ ingredient.original }}</li>
-                                {% endfor %}
-                              </ul>
-                            </div>
-                            {% endif %}
-                            
-                            {% if recipe.missedIngredients %}
-                            <div class="col-md-6">
-                              <h6><i class="fas fa-shopping-basket text-warning me-1"></i>Additional Ingredients Needed</h6>
-                              <ul class="ingredient-list">
-                                {% for ingredient in recipe.missedIngredients %}
-                                <li>{{ ingredient.original }}</li>
-                                {% endfor %}
-                              </ul>
-                            </div>
-                            {% endif %}
-                          </div>
-                        </div>
+                    <div class="d-flex align-items-center">
+                      {% if not recipe.legacy %}
+                      <div class="recipe-details mt-2 me-2">
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#recipe-{{ loop.index }}" aria-expanded="false">
+                          <i class="fas fa-info-circle me-1"></i>View Details
+                        </button>
+                        {% if recipe.sourceUrl %}
+                        <a href="{{ recipe.sourceUrl }}" target="_blank" class="btn btn-sm btn-outline-success ms-2">
+                          <i class="fas fa-external-link-alt me-1"></i>Source
+                        </a>
                         {% endif %}
                       </div>
+                      {% endif %}
+
                     </div>
-                    {% else %}
-                    <small class="text-muted">Using your selected ingredients</small>
-                    {% endif %}
+                    <div class="collapse mt-3" id="recipe-{{ loop.index }}">
+                      {% if recipe.summary %}
+                      <div class="card card-body mb-3">
+                        <h6 class="card-subtitle mb-2 text-muted">Summary</h6>
+                        <p class="card-text">{{ recipe.summary|safe }}</p>
+                      </div>
+                      {% endif %}
+                      {% if recipe.instructions %}
+                      <div class="card card-body mb-3">
+                        <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
+                        <p class="card-text">{{ recipe.instructions|safe }}</p>
+                      </div>
+                      {% endif %}
+                      {% if recipe.ingredients %}
+                      <div class="card card-body mb-3">
+                        <h6 class="card-subtitle mb-2 text-muted">Ingredients</h6>
+                        <p class="card-text">{{ recipe.ingredients|safe }}</p>
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="row mt-3">
+                      {% if recipe.usedIngredients %}
+                      <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success me-1"></i>Ingredients You Have</h6>
+                        <ul class="ingredient-list">
+                          {% for ingredient in recipe.usedIngredients %}
+                          <li>{{ ingredient.original }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                      {% endif %}
+                      {% if recipe.missedIngredients %}
+                      <div class="col-md-6">
+                        <h6><i class="fas fa-shopping-basket text-warning me-1"></i>Additional Ingredients Needed</h6>
+                        <ul class="ingredient-list">
+                          {% for ingredient in recipe.missedIngredients %}
+                          <li>{{ ingredient.original }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                      {% endif %}
+                    </div>
                   </div>
-                {% endif %}
-              </li>
+                </div>
+              </div>
+            </li>
             {% endfor %}
           </ul>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+  {% else %}
+  <section id="recipes-section" class="py-4 py-lg-5" data-aos="fade-up" data-aos-delay="150">
+    <div class="container">
+      <small class="text-muted">Using your selected ingredients</small>
+    </div>
+  </section>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const labels = document.querySelectorAll('.product-checkbox');
-    
+    const labels = document.querySelectorAll('.ingredient-checkbox');
+
     // Handle checkbox selection with enhanced UI feedback
     labels.forEach(label => label.addEventListener('click', function (event) {
       event.preventDefault(); // Prevent default to handle the toggle manually
-      
+
       const checkbox = label.querySelector('input');
       if (!checkbox.checked) {
         // Select the ingredient
         label.classList.add('btn-success');
         checkbox.checked = true;
-        
+
         // Add a subtle animation
         label.style.transform = 'scale(1.05)';
         setTimeout(() => {
@@ -263,7 +273,7 @@
         // Deselect the ingredient
         label.classList.remove('btn-success');
         checkbox.checked = false;
-        
+
         // Reset the style
         label.style.transform = 'scale(0.95)';
         setTimeout(() => {
@@ -271,15 +281,15 @@
         }, 150);
       }
     }));
-    
+
     // Add animation to the submit button
     const submitBtn = document.getElementById('submit');
     if (submitBtn) {
-      submitBtn.addEventListener('mouseenter', function() {
+      submitBtn.addEventListener('mouseenter', function () {
         this.querySelector('i').style.transform = 'translateY(-3px) scale(1.2)';
       });
-      
-      submitBtn.addEventListener('mouseleave', function() {
+
+      submitBtn.addEventListener('mouseleave', function () {
         this.querySelector('i').style.transform = '';
       });
     }
