@@ -2,6 +2,64 @@
 
 {% block title %}Dashboard | Recipe Hub{% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+  /* Custom styles for dashboard */
+  .recipe-item {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease, height 0.5s ease;
+  }
+  
+  .recipe-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .ingredient-item {
+    transition: all 0.3s ease;
+  }
+  
+  .ingredient-item.selected {
+    background-color: #ffc107 !important;
+    transform: translateY(-3px);
+  }
+  
+  /* Favorite button styles */
+  .favorite-btn {
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+  
+  .favorite-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .btn-pulse {
+    animation: pulse 0.3s ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+  
+  /* Toast notifications */
+  .toast-container {
+    z-index: 1100;
+  }
+  
+  /* Filter button styles */
+  .filter-btn.active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4 py-lg-5">
   <!-- Combined Welcome Card with Stats -->
@@ -26,16 +84,16 @@
               <div class="text-muted">Ingredients</div>
             </div>
             <div class="stat-item">
-              <div class="h3 mb-0 text-warning">{{ favorites|length if favorites else 0 }}</div>
+              <div class="h3 mb-0 text-warning" id="favorites-count">{{ favorites_count if favorites_count is defined else 0 }}</div>
               <div class="text-muted">Favorites</div>
             </div>
           </div>
           <div class="mt-3">
-            <a href="#recipes-section" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
+            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
               id="show-favs-btn" style="gap: 0.25rem;">
-              <i class="far fa-bookmark"></i>
-              <span>Favorites</span>
-            </a>
+              <i class="far fa-bookmark me-1"></i>
+              <span>Show Favorites</span>
+            </button>
           </div>
         </div>
         <div class="col-lg-4" data-aos="fade-left">
@@ -141,11 +199,14 @@
           <ul class="recipe-list">
             {% for recipe in recipes %}
             <li class="recipe-item position-relative" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
-              <a href="#null" class="position-absolute top-0 end-0 m-2 text-secondary" style="z-index:2;">
-                <button class="btn btn-sm btn-outline-secondary" tabindex="-1" style="margin: 4px;">
-                  <i class="far fa-bookmark"></i>
-                </button>
-              </a>
+              <button class="btn btn-sm {% if recipe.is_favorite %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} favorite-btn position-absolute top-0 end-0 m-3" 
+                      data-spoonacular-id="{{ recipe.spoonacular_id or recipe.id or '' }}" 
+                      data-recipe-title="{{ recipe.title or 'Untitled Recipe' }}"
+                      data-recipe-image="{{ recipe.image or url_for('static', filename='images/default_recipe.png') }}"
+                      data-is-favorite="{{ recipe.is_favorite|default(False)|lower }}"
+                      tabindex="-1">
+                <i class="{% if recipe.is_favorite %}fas text-danger{% else %}far{% endif %} fa-bookmark"></i>
+              </button>
               <div class="row g-0 align-items-center">
                 <div class="col-md-3">
                   <div class="recipe-image">
@@ -252,46 +313,358 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const labels = document.querySelectorAll('.ingredient-checkbox');
+    const ingredientItems = document.querySelectorAll('.ingredient-item');
 
     // Handle checkbox selection with enhanced UI feedback
-    labels.forEach(label => label.addEventListener('click', function (event) {
-      event.preventDefault(); // Prevent default to handle the toggle manually
-
-      const checkbox = label.querySelector('input');
-      if (!checkbox.checked) {
-        // Select the ingredient
-        label.classList.add('btn-success');
-        checkbox.checked = true;
-
-        // Add a subtle animation
-        label.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-          label.style.transform = 'translateY(-2px) scale(1.02)';
-        }, 150);
-      } else {
-        // Deselect the ingredient
-        label.classList.remove('btn-success');
-        checkbox.checked = false;
-
-        // Reset the style
-        label.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          label.style.transform = '';
-        }, 150);
+    ingredientItems.forEach(item => {
+      const checkbox = item.querySelector('.ingredient-checkbox');
+      const label = item.querySelector('.ingredient-label');
+      
+      if (checkbox && label) {
+        // Handle click on the label
+        label.addEventListener('click', function(event) {
+          // Let the native checkbox behavior work
+          // No need to prevent default
+          
+          // Add visual feedback
+          if (checkbox.checked) {
+            // Selected state
+            label.classList.add('btn-success');
+            
+            // Add a subtle animation
+            label.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+              label.style.transform = 'translateY(-2px) scale(1.02)';
+            }, 150);
+          } else {
+            // Deselected state
+            label.classList.remove('btn-success');
+            
+            // Reset the style
+            label.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              label.style.transform = '';
+            }, 150);
+          }
+        });
+        
+        // Also add a direct event handler to the checkbox
+        checkbox.addEventListener('change', function() {
+          if (this.checked) {
+            label.classList.add('btn-success');
+            
+            // Add a subtle animation
+            label.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+              label.style.transform = 'translateY(-2px) scale(1.02)';
+            }, 150);
+          } else {
+            label.classList.remove('btn-success');
+            
+            // Reset the style
+            label.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              label.style.transform = '';
+            }, 150);
+          }
+        });
       }
-    }));
+    });
 
     // Add animation to the submit button
     const submitBtn = document.getElementById('submit');
     if (submitBtn) {
       submitBtn.addEventListener('mouseenter', function () {
-        this.querySelector('i').style.transform = 'translateY(-3px) scale(1.2)';
+        const icon = this.querySelector('i');
+        if (icon) {
+          icon.style.transform = 'translateY(-3px) scale(1.2)';
+        }
       });
 
       submitBtn.addEventListener('mouseleave', function () {
-        this.querySelector('i').style.transform = '';
+        const icon = this.querySelector('i');
+        if (icon) {
+          icon.style.transform = '';
+        }
       });
+    }
+    
+    // Handle favorite button clicks
+    /**
+     * Manages the favorite recipe functionality. This includes:
+     * 1. Toggling the favorite status when clicking the bookmark button
+     * 2. Updating the UI to reflect the current favorite status
+     * 3. Updating the favorite count in the dashboard stats
+     * 4. Handling visibility in favorites view
+     */
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    favoriteButtons.forEach(btn => {
+      btn.addEventListener('click', function(event) {
+        // Prevent any default action or event bubbling
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Get recipe data from button attributes
+        const spoonacularId = this.getAttribute('data-spoonacular-id');
+        const recipeTitle = this.getAttribute('data-recipe-title');
+        const recipeImage = this.getAttribute('data-recipe-image'); // spoonacular_id is the only identifier used
+
+        // Defensive check: do not proceed if any value is missing
+        if (!spoonacularId || !recipeTitle || !recipeImage) {
+          console.error('Favorite toggle missing data:', {spoonacularId, recipeTitle, recipeImage});
+          showToast('Missing recipe data for favorite action', 'error');
+          return;
+        }
+        // Debug log for all outgoing favorite requests
+        console.log('Favorite toggle:', {spoonacularId, recipeTitle, recipeImage});
+        
+        // Add a visual feedback for the click
+        this.classList.add('btn-pulse');
+        setTimeout(() => this.classList.remove('btn-pulse'), 300);
+        
+        // Send the request to server
+        fetch('/toggle-favorite', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            spoonacular_id: spoonacularId,
+            recipe_data: {
+              id: spoonacularId,
+              title: recipeTitle,
+              image: recipeImage
+            }
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Get the icon within this button
+            const icon = this.querySelector('i');
+            
+            // Update the UI based on the new favorite status
+            if (data.action === 'added') {
+              // Mark as favorite - visual changes
+              icon.classList.remove('far');
+              icon.classList.add('fas', 'text-danger');
+              this.setAttribute('data-is-favorite', 'true');
+              this.classList.remove('btn-outline-secondary');
+              this.classList.add('btn-outline-danger');
+              
+              // Optional: Show toast notification
+              showToast('Added to favorites!', 'success');
+            } else {
+              // Unmark as favorite - visual changes
+              icon.classList.remove('fas', 'text-danger');
+              icon.classList.add('far');
+              this.setAttribute('data-is-favorite', 'false');
+              this.classList.remove('btn-outline-danger');
+              this.classList.add('btn-outline-secondary');
+              
+              // Optional: Show toast notification
+              showToast('Removed from favorites', 'info');
+            }
+            
+            // Update favorites count in the stats
+            const favoritesCount = document.getElementById('favorites-count');
+            if (favoritesCount) {
+              favoritesCount.textContent = data.favorites_count;
+            }
+            
+            // If in favorites view and we removed a favorite, hide the recipe card
+            const isInFavoritesView = window.location.pathname === '/favorites';
+            if (isInFavoritesView && data.action === 'removed') {
+              // Hide the removed recipe with animation
+              const recipeItem = this.closest('.recipe-item');
+              recipeItem.style.transition = 'opacity 0.5s, height 0.5s';
+              recipeItem.style.opacity = '0';
+              
+              // After fade out, collapse the height and then hide completely
+              setTimeout(() => {
+                recipeItem.style.height = '0';
+                recipeItem.style.marginBottom = '0';
+                recipeItem.style.overflow = 'hidden';
+                
+                setTimeout(() => {
+                  recipeItem.style.display = 'none';
+                }, 500); // Wait for height animation to finish
+              }, 500); // Wait for opacity animation to finish
+            }
+            
+            // Update all buttons for the same recipe (if multiple instances exist)
+            if (spoonacularId) {
+              document.querySelectorAll(`.favorite-btn[data-spoonacular-id="${spoonacularId}"]`).forEach(otherBtn => {
+                if (otherBtn !== this) {
+                  const otherIcon = otherBtn.querySelector('i');
+                  if (data.action === 'added') {
+                    otherBtn.setAttribute('data-is-favorite', 'true');
+                    otherIcon.classList.remove('far');
+                    otherIcon.classList.add('fas', 'text-danger');
+                    otherBtn.classList.remove('btn-outline-secondary');
+                    otherBtn.classList.add('btn-outline-danger');
+                  } else {
+                    otherBtn.setAttribute('data-is-favorite', 'false');
+                    otherIcon.classList.remove('fas', 'text-danger');
+                    otherIcon.classList.add('far');
+                    otherBtn.classList.remove('btn-outline-danger');
+                    otherBtn.classList.add('btn-outline-secondary');
+                  }
+                }
+              });
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error toggling favorite:', error);
+          showToast('Failed to update favorite status', 'error');
+        });
+      });
+    });
+    
+    /**
+     * Helper function to show toast notifications
+     * @param {string} message - The message to display
+     * @param {string} type - The type of toast (success, error, info, warning)
+     */
+    function showToast(message, type = 'info') {
+      // Check if we have a toast container, create one if not
+      let toastContainer = document.querySelector('.toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+      }
+      
+      // Create a new toast
+      const toastId = 'toast-' + Date.now();
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type}" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+      
+      // Add the toast to the container
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+      
+      // Initialize and show the toast
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+      toast.show();
+      
+      // Remove the toast element after it's hidden
+      toastElement.addEventListener('hidden.bs.toast', function() {
+        this.remove();
+      });
+    }
+       // Initialize favorite buttons with correct appearance
+    favoriteButtons.forEach(btn => {
+      if (btn.getAttribute('data-is-favorite') === 'true') {
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-outline-danger');
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.classList.remove('far');
+          icon.classList.add('fas', 'text-danger');
+        }
+      }
+    });
+    
+    /**
+     * Handle the "Show Favorites" button functionality
+     */
+    const showFavoritesBtn = document.getElementById('show-favs-btn');
+    if (showFavoritesBtn) {
+      // Add click event listener to toggle favorites view
+      showFavoritesBtn.addEventListener('click', function() {
+        // Scroll to the recipes section with smooth animation
+        const recipeSection = document.getElementById('recipes-section');
+        if (recipeSection) {
+          recipeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Check if currently showing favorites or all recipes
+        const isShowingFavorites = this.classList.contains('active');
+        const recipeItems = document.querySelectorAll('.recipe-item');
+        
+        if (!isShowingFavorites) {
+          // Switch to showing only favorites
+          this.classList.add('active', 'btn-danger');
+          this.classList.remove('btn-outline-secondary');
+          
+          // Update button text
+          this.innerHTML = '<i class="fas fa-bookmark me-1"></i><span>Show All Recipes</span>';
+          
+          // Hide non-favorites with fade animation
+          recipeItems.forEach(item => {
+            const favoriteBtn = item.querySelector('.favorite-btn');
+            const isFavorite = favoriteBtn && favoriteBtn.getAttribute('data-is-favorite') === 'true';
+            
+            if (!isFavorite) {
+              // Fade out then hide
+              item.style.transition = 'opacity 0.3s ease';
+              item.style.opacity = '0';
+              setTimeout(() => {
+                item.style.display = 'none';
+              }, 300);
+            }
+          });
+          
+          // Show feedback toast
+          showToast('Showing only favorite recipes', 'success');
+        } else {
+          // Switch back to showing all recipes
+          this.classList.remove('active', 'btn-danger');
+          this.classList.add('btn-outline-secondary');
+          
+          // Reset button content
+          this.innerHTML = '<i class="far fa-bookmark me-1"></i><span>Show Favorites</span>';
+          
+          // Show all recipes with fade-in animation
+          recipeItems.forEach(item => {
+            if (item.style.display === 'none') {
+              item.style.display = '';
+              item.style.opacity = '0';
+              setTimeout(() => {
+                item.style.opacity = '1';
+              }, 50);
+            }
+          });
+          
+          // Show feedback toast
+          showToast('Showing all recipes', 'info');
+        }
+      });
+    }
+    
+    // Initialize favorites view if on favorites page
+    if (window.location.pathname === '/favorites') {
+      // Update the favorites button to show we're in favorites mode
+      if (showFavoritesBtn) {
+        showFavoritesBtn.classList.add('active', 'btn-danger');
+        showFavoritesBtn.classList.remove('btn-outline-secondary');
+        showFavoritesBtn.innerHTML = '<i class="fas fa-bookmark me-1"></i><span>Show All Recipes</span>';
+        
+        // Hide non-favorite recipes with a small delay to ensure DOM is ready
+        setTimeout(() => {
+          document.querySelectorAll('.recipe-item').forEach(item => {
+            const favoriteBtn = item.querySelector('.favorite-btn');
+            if (favoriteBtn && favoriteBtn.getAttribute('data-is-favorite') !== 'true') {
+              item.style.display = 'none';
+            }
+          });
+        }, 100);
+      }
     }
   });
 </script>

@@ -1,33 +1,52 @@
 import os
 import requests
+import uuid
+import datetime
+from typing import List, Set, Dict, Any, Optional, Union
 from flask_login import current_user
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from msrest.authentication import CognitiveServicesCredentials
 from . import db
 from .models import ImgSet, Recipe
-import uuid, os
-import datetime
 from flask import url_for, current_app, jsonify, request
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
-import requests
 from . import mail
 
 # helper function for 'retrieve_product_labels()'
-def load_whitelist():
+def load_whitelist() -> Set[str]:
+    """Load the whitelist of recognized grocery items from a file.
+    
+    Reads a file containing one grocery item name per line, and returns
+    a set of these items for filtering product tags.
+    
+    Returns:
+        Set[str]: A set of valid grocery item names from the whitelist.
+    """
     whitelist_file = os.getenv('WHITELIST_FILE')
     with open(whitelist_file, 'r') as file:
         return set(line.strip() for line in file)
 
-# Process uploaded images via Azure Vision API
-def retrieve_product_labels(path_to_imgset_dir):
+def retrieve_product_labels(path_to_imgset_dir: str) -> List[str]:
+    """Process uploaded images via Azure Vision API and extract product labels.
+    
+    This function analyzes images in the specified directory using Azure Computer Vision API,
+    extracts product tags, filters them against a predefined whitelist, and saves the results
+    to the database.
+    
+    Args:
+        path_to_imgset_dir: Path to the directory containing the uploaded images.
+        
+    Returns:
+        List[str]: A list of recognized product names from the images.
+    """
     # Client for Azure Vision API
     endpoint = os.getenv('AZURE_COMPUTERVISION_ENDPOINT')
     key = os.getenv('AZURE_COMPUTERVISION_KEY')
     client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(key))
 
     # Retrieve 'product.tags'
-    products = set()
+    products: Set[str] = set()
     for filename in os.listdir(path_to_imgset_dir):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
             file_path = os.path.join(path_to_imgset_dir, filename)
@@ -40,20 +59,33 @@ def retrieve_product_labels(path_to_imgset_dir):
                 if ' ' not in tag.name:
                     products.add(tag.name)
     
-    # Filter out 'product.tags' against the whitelist (of a 100 predifined grocery items)
+    # Filter out 'product.tags' against the whitelist (of a 100 predefined grocery items)
     whitelist = load_whitelist()
-    products = [product for product in products if product in whitelist]
+    filtered_products: List[str] = [product for product in products if product in whitelist]
 
     # Add recognized 'product.tags' to DB as CSV
     img_set = ImgSet.query.filter_by(folder_path=path_to_imgset_dir).first()
     if img_set:
-        img_set.products = ', '.join(products)
+        img_set.products = ', '.join(filtered_products)
         db.session.commit()
 
-    return list(products)
+    return filtered_products
 
-# Obtain recipes via the Spoonacular API
-def retrieve_recipes_by_ingredients(products):
+def retrieve_recipes_by_ingredients(products: List[str]) -> List[Dict[str, Any]]:
+    """Fetch recipe recommendations based on a list of ingredients using Spoonacular API.
+    
+    This function calls the Spoonacular API to find recipes that match the provided
+    ingredients, enriches the data with detailed recipe information, and stores
+    the results in the database.
+    
+    Args:
+        products: A list of ingredient names to search for recipes.
+        
+    Returns:
+        List[Dict[str, Any]]: A list of recipe dictionaries containing detailed recipe information.
+            Each dictionary includes fields like id, title, image, ingredients, instructions, etc.
+            If an error occurs, returns a single item with an error message.
+    """
     product_string = ','.join(products)
     
     # Create Spoonacular API Endpoint
@@ -68,11 +100,8 @@ def retrieve_recipes_by_ingredients(products):
         # Store the full recipe data
         data = response.json()
         
-        # For backwards compatibility, still store recipe titles as comma-separated string
-        recipe_titles = [recipe['title'] for recipe in data]
-        
         # Create a list to store enriched recipe data
-        enriched_recipes = []
+        enriched_recipes: List[Dict[str, Any]] = []
         
         # Get more details for each recipe
         for recipe_basic in data:
@@ -84,7 +113,7 @@ def retrieve_recipes_by_ingredients(products):
             if info_response.status_code == 200:
                 recipe_info = info_response.json()
                 # Combine basic and detailed info
-                recipe_data = {
+                recipe_data: Dict[str, Any] = {
                     'id': recipe_id,
                     'title': recipe_basic['title'],
                     'image': recipe_basic['image'],
@@ -101,13 +130,14 @@ def retrieve_recipes_by_ingredients(products):
                 }
                 enriched_recipes.append(recipe_data)
         
-        # Store both the legacy format and new detailed format
-        recipe_entry = Recipe(
-            user_id=current_user.id,
-            recipes=','.join(recipe_titles),
-            recipe_data=enriched_recipes
-        )
-        db.session.add(recipe_entry)
+        # Store each recipe as a global entry if not already present
+        for recipe in enriched_recipes:
+            if not Recipe.query.filter_by(spoonacular_id=str(recipe['id'])).first():
+                recipe_entry = Recipe(
+                    spoonacular_id=str(recipe['id']),
+                    recipe_data=recipe
+                )
+                db.session.add(recipe_entry)
         db.session.commit()
         
         return enriched_recipes
@@ -115,49 +145,36 @@ def retrieve_recipes_by_ingredients(products):
         return [{"title": "Error fetching recipes, please try again later.", "error": True}]
 
 
-# Obtain ALL the 'products' for CURR_USER from DB (less duplicates)
-def fetch_user_products():
+def fetch_user_products() -> List[str]:
+    """Retrieve all unique products associated with the current user.
+    
+    This function fetches all ImgSet entries for the current user, extracts the
+    products from each entry, and returns a deduplicated list of product names.
+    
+    Returns:
+        List[str]: A list of unique product names associated with the current user.
+    """
     imgsets = ImgSet.query.filter_by(user_id=current_user.id).all()
 
-    products_with_duplicates = []
+    products_with_duplicates: List[str] = []
     for imgset in imgsets:
         if imgset.products:
             products_with_duplicates.extend([product.strip() for product in imgset.products.split(',')])
 
     return list(set(products_with_duplicates))
 
-# Obtain ALL the 'recipes' for CURR_USER from DB (less duplicates)
-def fetch_user_recipes():
-    recipe_entries = Recipe.query.filter_by(user_id=current_user.id).all()
-    
-    # First try to get detailed recipe data from JSON field
-    all_recipes = []
-    recipe_ids_seen = set()  # Track recipe IDs to avoid duplicates
-    
+def fetch_all_recipes() -> List[Dict[str, Any]]:
+    """
+    Retrieve all global recipes in the database.
+
+    Returns:
+        List[Dict[str, Any]]: A list of all recipe dictionaries in the database.
+    """
+    recipe_entries = Recipe.query.all()
+    all_recipes: List[Dict[str, Any]] = []
     for entry in recipe_entries:
-        if entry.recipe_data:  # Use the new JSON data field if available
-            for recipe in entry.recipe_data:
-                # Skip recipes we've already seen (avoid duplicates)
-                if recipe.get('id') and recipe.get('id') in recipe_ids_seen:
-                    continue
-                    
-                # Add this recipe ID to our tracking set
-                if recipe.get('id'):
-                    recipe_ids_seen.add(recipe.get('id'))
-                    
-                all_recipes.append(recipe)
-        elif entry.recipes:  # Fall back to legacy data if no JSON data
-            # For legacy entries, create a simple format matching the new structure
-            for title in [r.strip() for r in entry.recipes.split(',')]:
-                # Only add if we don't already have a recipe with this title
-                if not any(r.get('title') == title for r in all_recipes):
-                    all_recipes.append({
-                        'title': title,
-                        'readyInMinutes': 30,  # Default values
-                        'difficulty': 'Easy',
-                        'legacy': True  # Mark as legacy data
-                    })
-    
+        if entry.recipe_data:
+            all_recipes.append(entry.recipe_data)
     return all_recipes
 
 
