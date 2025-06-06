@@ -284,9 +284,9 @@ def reset_password(user):
         serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         token = serializer.dumps(user.email, salt='password-reset-salt')
         
-        # Store token and expiration in user record (optional, for extra security)
+        # Store token and expiration in user record (for extra security)
         user.verification_token = token
-        user.token_expiration = calculate_token_expiry(hours=1)  # e.g., 1 hour expiry for reset
+        user.token_expiration = calculate_token_expiry(hours=1)  # 1 hour expiry for reset
         db.session.commit()
 
         # Create password reset URL

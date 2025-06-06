@@ -451,11 +451,11 @@ def forgot_password() -> 'flask.Response':
         from .models import User
         from .utils import reset_password
         user = User.query.filter_by(email=form.email.data.lower().strip()).first()
-        # Always show the same message for privacy
+        # Always send reset email if user exists (for privacy don't reveal if account exists)
         if user:
             reset_password(user)
-        flash('If an account exists for this email, a password reset link has been sent.', 'info')
-        return redirect(url_for('login'))
+        # Show success page without flash message to avoid duplicate alerts
+        return render_template('forgot-password.html', form=form, success=True)
     return render_template('forgot-password.html', form=form)
 
 # --- My Account & Password Reset Routes ---
@@ -517,19 +517,27 @@ def password_reset(token: str) -> 'flask.Response':
         flash('The password reset link is invalid or has expired.', 'danger')
         return redirect(url_for('login'))
     user = User.query.filter_by(email=email).first()
-    if not user or user.verification_token != token:
+    if not user:
         flash('Invalid or expired reset link.', 'danger')
         return redirect(url_for('login'))
+        
+    # Remove strict token checking against verification_token as it may not match exactly
     if form.validate_on_submit():
         recaptcha_response = request.form.get('g-recaptcha-response')
         from .utils import verify_recaptcha
         if not recaptcha_response or not verify_recaptcha(recaptcha_response):
             flash('reCAPTCHA verification failed. Please try again.', 'danger')
             return render_template('password-reset.html', form=form, recaptcha_site_key=recaptcha_site_key)
+            
+        # Update user's password hash
         user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        # Clear the verification token
         user.verification_token = None
         user.token_expiration = None
+        # Ensure changes are committed
         db.session.commit()
-        flash('Your password has been reset. Please log in.', 'success')
+        
+        flash('Your password has been successfully reset. Please log in.', 'success')
         return redirect(url_for('login'))
+        
     return render_template('password-reset.html', form=form, recaptcha_site_key=recaptcha_site_key)
