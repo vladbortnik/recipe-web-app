@@ -70,7 +70,7 @@
           <h1 class="display-5 fw-bold mb-3">Welcome back, {{ current_user.first_name or 'Chef' }}!</h1>
           <p class="lead text-muted mb-4">Let's get inspired and cook something amazing today.</p>
           <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
-            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4">
+            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 w-50">
               <i class="fas fa-cloud-upload-alt me-2"></i>Upload Ingredients
             </a>
           </div>
@@ -89,7 +89,7 @@
             </div>
           </div>
           <div class="mt-3">
-            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
+            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center w-50"
               id="show-favs-btn" style="gap: 0.25rem;">
               <i class="far fa-bookmark me-1"></i>
               <span>Show Favorites</span>
