@@ -198,7 +198,7 @@
         <div class="card-body p-4">
           <ul class="recipe-list">
             {% for recipe in recipes %}
-            <li class="recipe-item position-relative" data-aos="fade-right" data-aos-delay="{{ loop.index0 * 100 }}">
+            <li class="recipe-item position-relative" data-aos="fade-right" data-aos-anchor-placement="top-bottom" data-aos-delay="{{ loop.index0 * 100 }}">
               <button class="btn btn-sm {% if recipe.is_favorite %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} favorite-btn position-absolute top-0 end-0 m-3" 
                       data-spoonacular-id="{{ recipe.spoonacular_id or recipe.id or '' }}" 
                       data-recipe-title="{{ recipe.title or 'Untitled Recipe' }}"
@@ -311,8 +311,14 @@
 {% block scripts %}
 {{ super() }}
 
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Initialize AOS with settings that prevent unwanted reverse animations
+    AOS.init({
+      duration: 800,
+      once: true    // Only animate elements once when they enter the viewport
+    });
     const ingredientItems = document.querySelectorAll('.ingredient-item');
 
     // Handle checkbox selection with enhanced UI feedback
@@ -620,6 +626,28 @@
             }
           });
           
+          // After hiding non-favorites, fix animation on visible favorites
+          setTimeout(() => {
+            // Find all visible favorite items
+            const visibleItems = Array.from(recipeItems).filter(item => 
+              item.style.display !== 'none'
+            );
+            
+            if (visibleItems.length > 0) {
+              // Fix common issue with last item not animating
+              const lastItem = visibleItems[visibleItems.length - 1];
+              
+              // Apply class directly to ensure animation
+              lastItem.classList.add('aos-animate');
+              
+              // Slightly adjust position to trigger animation refresh if needed
+              lastItem.style.transform = 'translateY(0.1px)';
+              setTimeout(() => {
+                lastItem.style.transform = '';
+              }, 50);
+            }
+          }, 350); // After the hide animation completes
+          
           // Show feedback toast
           showToast('Showing only favorite recipes', 'success');
         } else {
@@ -657,12 +685,31 @@
         
         // Hide non-favorite recipes with a small delay to ensure DOM is ready
         setTimeout(() => {
-          document.querySelectorAll('.recipe-item').forEach(item => {
+          // Get all recipe items and count favorites for positioning
+          const allItems = document.querySelectorAll('.recipe-item');
+          let visibleCount = 0;
+          
+          // First pass - count and hide non-favorites
+          allItems.forEach(item => {
             const favoriteBtn = item.querySelector('.favorite-btn');
             if (favoriteBtn && favoriteBtn.getAttribute('data-is-favorite') !== 'true') {
               item.style.display = 'none';
+            } else {
+              visibleCount++;
             }
           });
+          
+          // Second pass - ensure last item has aos-animate class
+          if (visibleCount > 0) {
+            // Find all visible items
+            const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+            const lastItem = visibleItems[visibleItems.length - 1];
+            
+            // Force animation on last item
+            if (lastItem) {
+              lastItem.classList.add('aos-animate');
+            }
+          }
         }, 100);
       }
     }
