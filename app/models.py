@@ -8,11 +8,14 @@ class User(db.Model, UserMixin):
     
     This model stores user account information including email, password hash,
     verification status, and security tokens for email verification and password reset.
+    Supports both local authentication and Google OAuth.
     
     Attributes:
         id: Primary key for the user.
         email: User's email address, must be unique.
-        password: Hashed password for authentication.
+        password: Hashed password for authentication (nullable for OAuth users).
+        google_id: Google OAuth user ID (nullable for local users).
+        auth_provider: Authentication provider ('local' or 'google').
         is_verified: Boolean indicating if the email has been verified.
         verification_token: Token for email verification or password reset.
         token_expiration: Datetime when the token expires.
@@ -21,7 +24,9 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id: int = db.Column(db.Integer, primary_key=True)
     email: str = db.Column(db.String(70), unique=True, nullable=False)
-    password: str = db.Column(db.String(256), nullable=False)
+    password: Optional[str] = db.Column(db.String(256), nullable=True)  # Nullable for OAuth users
+    google_id: Optional[str] = db.Column(db.String(100), unique=True, nullable=True)
+    auth_provider: str = db.Column(db.String(20), default='local', nullable=False)  # 'local' or 'google'
     is_verified: bool = db.Column(db.Boolean, default=False, nullable=False)
     verification_token: Optional[str] = db.Column(db.String(100), nullable=True)
     token_expiration: Optional[datetime] = db.Column(db.DateTime, nullable=True)
@@ -87,4 +92,3 @@ class Favorite(db.Model):
 
     user = db.relationship('User', backref=db.backref('favorites', lazy=True))
     recipe = db.relationship('Recipe', backref=db.backref('favorited_by', lazy=True), primaryjoin="Favorite.spoonacular_id==Recipe.spoonacular_id")
-

@@ -31,6 +31,9 @@
     <link rel="icon" type="image/x-icon" sizes="16x16 32x32" href="{{ url_for('static', filename='favicon.ico') }}">
     <title>{% block title %}{% endblock %}</title>
     {% block head %}{% endblock %}
+
+    <!-- Cookie Consent CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 </head>
 
 <body>
@@ -127,7 +130,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <h5><i class="fas fa-utensils me-2"></i>Recipe Hub</h5>
-                    <p class="small mb-0">© 2025 Recipe Hub. All rights reserved.</p>
+                    <p class="small mb-0"> 2025 Recipe Hub. All rights reserved.</p>
                 </div>
             </div>
         </div>
@@ -150,6 +153,92 @@
 
     <!-- Custom scripts -->
     {% block scripts %}{% endblock %}
+
+    <!-- Include Google Analytics (with cookie consent integration) -->
+    {% include 'google-analytics.html' %}
+
+    <!-- Cookie Consent Script -->
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+    <script>
+        window.cookieconsent.initialise({
+            "palette": {
+                "popup": {
+                    "background": "#1d2c4d",
+                    "text": "#ffffff"
+                },
+                "button": {
+                    "background": "#f1d600",
+                    "text": "#000000"
+                }
+            },
+            "theme": "classic",
+            "position": "bottom-right",
+            "type": "opt-in",  // Changed to opt-in for 2024 compliance
+            "content": {
+                "message": "We use cookies to improve your experience and analyze site usage. This includes analytics cookies that help us understand how you interact with our recipes.",
+                "dismiss": "Accept All Cookies",
+                "deny": "Decline Analytics",
+                "link": "Privacy Policy",
+                "href": "/privacy"  // You should create this page
+            },
+            "law": {
+                "regionalLaw": true,
+                "countryCode": "EU"  // Enables stricter EU/GDPR compliance
+            },
+            "onStatusChange": function(status, chosenBefore) {
+                var consentGranted = this.hasConsented();
+                
+                // Update Google Consent Mode v2
+                if (window.updateGoogleConsent) {
+                    window.updateGoogleConsent(consentGranted);
+                }
+                
+                // Legacy support for loadGoogleAnalytics function
+                if (consentGranted && window.loadGoogleAnalytics) {
+                    window.loadGoogleAnalytics();
+                }
+                
+                // Log consent change for debugging
+                console.log('Cookie consent status changed:', consentGranted ? 'granted' : 'denied');
+            },
+            "onInitialise": function(status) {
+                var consentGranted = this.hasConsented();
+                
+                // Update Google Consent Mode v2 on page load
+                if (window.updateGoogleConsent) {
+                    window.updateGoogleConsent(consentGranted);
+                }
+                
+                // Legacy support
+                if (consentGranted && window.loadGoogleAnalytics) {
+                    window.loadGoogleAnalytics();
+                }
+                
+                console.log('Cookie consent initialized:', consentGranted ? 'granted' : 'denied');
+            },
+            "onNoCookieLaw": function(countryCode, country) {
+                // For non-EU users, grant consent by default but still show banner
+                if (window.updateGoogleConsent) {
+                    window.updateGoogleConsent(true);
+                }
+            }
+        });
+
+        // Enhanced consent management functions
+        window.revokeConsent = function() {
+            window.cookieconsent.revokeChoice();
+            if (window.updateGoogleConsent) {
+                window.updateGoogleConsent(false);
+            }
+        };
+
+        window.grantConsent = function() {
+            window.cookieconsent.setStatus(window.cookieconsent.status.allow);
+            if (window.updateGoogleConsent) {
+                window.updateGoogleConsent(true);
+            }
+        };
+    </script>
 </body>
 
 </html>

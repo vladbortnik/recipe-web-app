@@ -2,11 +2,24 @@ import uuid, os
 from flask import current_app as app
 from flask import request, render_template, redirect, url_for, flash, session, abort, jsonify, Response
 from flask_login import login_user, current_user, logout_user, login_required
+from authlib.integrations.flask_client import OAuth
 from . import db, bcrypt
 from .forms import LoginForm, SignupForm, UploadImageForm, PasswordResetForm, EmptyForm, ForgotPasswordForm
 from .models import User, ImgSet, Recipe, Favorite
 from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_all_recipes, send_verification_email, verify_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
+# Initialize OAuth
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=app.config['GOOGLE_CLIENT_ID'],
+    client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
 
 @app.route('/')
 def index() -> 'flask.Response':
@@ -541,3 +554,95 @@ def password_reset(token: str) -> 'flask.Response':
         return redirect(url_for('login'))
         
     return render_template('password-reset.html', form=form, recaptcha_site_key=recaptcha_site_key)
+
+@app.route('/auth/google')
+def google_login() -> 'flask.Response':
+    """Initiate Google OAuth flow.
+    
+    This route redirects the user to Google's OAuth authorization page.
+    After authorization, Google will redirect back to the callback route.
+    
+    Returns:
+        flask.Response: Redirect to Google's OAuth authorization page.
+    """
+    redirect_uri = url_for('google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+
+@app.route('/auth/google/callback')
+def google_callback() -> 'flask.Response':
+    """Handle Google OAuth callback.
+    
+    This route processes the authorization code returned by Google,
+    exchanges it for user information, and either logs in an existing user
+    or creates a new user account.
+    
+    Returns:
+        flask.Response: Redirects to dashboard on success or login page on failure.
+    """
+    try:
+        # Get the authorization token from Google
+        token = google.authorize_access_token()
+        
+        # Get user information from Google
+        user_info = token.get('userinfo')
+        if not user_info:
+            flash('Failed to get user information from Google.', 'danger')
+            return redirect(url_for('login'))
+        
+        google_id = user_info.get('sub')
+        email = user_info.get('email')
+        
+        if not google_id or not email:
+            flash('Invalid user information received from Google.', 'danger')
+            return redirect(url_for('login'))
+        
+        # Check if user already exists with this Google ID
+        user = User.query.filter_by(google_id=google_id).first()
+        
+        if user:
+            # Existing Google user - log them in
+            login_user(user, remember=True)
+            flash(f'Welcome back, {email}!', 'success')
+            return redirect(url_for('dashboard'))
+        
+        # Check if user exists with this email (for account linking)
+        existing_user = User.query.filter_by(email=email).first()
+        
+        if existing_user:
+            if existing_user.auth_provider == 'local':
+                # Link Google account to existing local account
+                existing_user.google_id = google_id
+                existing_user.auth_provider = 'google'  # Update to Google auth
+                existing_user.is_verified = True  # Google accounts are pre-verified
+                db.session.commit()
+                
+                login_user(existing_user, remember=True)
+                flash(f'Your Google account has been linked! Welcome back, {email}!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                # User already exists with Google auth but different Google ID
+                flash('An account with this email already exists. Please use the existing login method.', 'warning')
+                return redirect(url_for('login'))
+        
+        # Create new user account
+        new_user = User(
+            email=email,
+            google_id=google_id,
+            auth_provider='google',
+            is_verified=True,  # Google accounts are pre-verified
+            password=None  # No password needed for OAuth users
+        )
+        
+        db.session.add(new_user)
+        db.session.commit()
+        
+        # Log in the new user
+        login_user(new_user, remember=True)
+        flash(f'Account created successfully! Welcome, {email}!', 'success')
+        return redirect(url_for('dashboard'))
+        
+    except Exception as e:
+        app.logger.error(f'Google OAuth callback error: {str(e)}')
+        flash('An error occurred during Google sign-in. Please try again.', 'danger')
+        return redirect(url_for('login'))
