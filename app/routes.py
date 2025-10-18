@@ -24,11 +24,20 @@ google = oauth.register(
 @app.route('/')
 def index() -> 'flask.Response':
     """Display the application's home page.
-    
+
     Returns:
         Response: Renders the index.html template.
     """
     return render_template('index.html')
+
+@app.route('/health')
+def health() -> 'flask.Response':
+    """Health check endpoint for load balancer monitoring.
+
+    Returns:
+        flask.Response: JSON response with status OK if the service is healthy.
+    """
+    return jsonify({"status": "healthy", "service": "recipe-web-app"}), 200
 
 def get_favorites_count() -> int:
     """Helper function to count favorite recipes for the current user.
