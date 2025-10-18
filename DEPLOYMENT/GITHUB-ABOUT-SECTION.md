@@ -4,7 +4,7 @@
 Turn ingredients into culinary magic with AI-powered recipe suggestions. Upload ingredient photos, discover personalized recipes. Built with Flask, PostgreSQL, Azure AI & Spoonacular API.
 
 ## Website URL
-http://recipe.vladbortnik.dev
+https://recipe.vladbortnik.dev
 
 ## Topics/Tags (separate with spaces)
 ```
