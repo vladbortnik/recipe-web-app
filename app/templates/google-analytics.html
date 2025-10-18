@@ -1,0 +1,83 @@
+<!-- Google Analytics with Consent Mode v2 (2024 Compliance) -->
+<script>
+// Initialize dataLayer before any Google tags (MANDATORY for Consent Mode v2)
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+
+// Set default consent states (REQUIRED for Consent Mode v2)
+gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',        // NEW in v2 - required
+    'ad_personalization': 'denied',  // NEW in v2 - required
+    'functionality_storage': 'granted',
+    'security_storage': 'granted'
+});
+
+// Load Google Analytics immediately (will work with consent states)
+gtag('js', new Date());
+gtag('config', 'G-LLKG1K4C9Y', {
+    'anonymize_ip': true,
+    'allow_google_signals': false  // Will be enabled after consent
+});
+
+// Function to update consent when user accepts/denies
+window.updateGoogleConsent = function(consentGranted) {
+    gtag('consent', 'update', {
+        'analytics_storage': consentGranted ? 'granted' : 'denied',
+        'ad_storage': consentGranted ? 'granted' : 'denied',
+        'ad_user_data': consentGranted ? 'granted' : 'denied',
+        'ad_personalization': consentGranted ? 'granted' : 'denied'
+    });
+    
+    // Enable Google Signals if consent is granted
+    if (consentGranted) {
+        gtag('config', 'G-LLKG1K4C9Y', {
+            'allow_google_signals': true
+        });
+    }
+};
+
+// Function to load Google Analytics script (legacy support)
+function loadGoogleAnalytics() {
+    // Google Analytics is now loaded immediately above
+    // This function maintained for backward compatibility
+    if (document.cookie.indexOf('cookieconsent_status=allow') !== -1) {
+        window.updateGoogleConsent(true);
+    }
+}
+
+// Initialize Google Analytics based on existing cookie consent status
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if cookie consent has already been given
+    if (document.cookie.indexOf('cookieconsent_status=allow') !== -1) {
+        window.updateGoogleConsent(true);
+    }
+    
+    // Legacy cookie check (fallback)
+    if (window.cookieconsent && window.cookieconsent.hasConsented && window.cookieconsent.hasConsented()) {
+        window.updateGoogleConsent(true);
+    }
+});
+
+// Enhanced event tracking with consent awareness
+window.trackRecipeEvent = function(action, recipeName, category) {
+    // Only track detailed events if analytics consent is granted
+    if (document.cookie.indexOf('cookieconsent_status=allow') !== -1) {
+        gtag('event', action, {
+            'event_category': 'Recipe',
+            'event_label': recipeName || 'Unknown Recipe',
+            'recipe_category': category || 'General',
+            'value': 1
+        });
+    }
+};
+
+// Utility function to check consent status
+window.hasAnalyticsConsent = function() {
+    return document.cookie.indexOf('cookieconsent_status=allow') !== -1;
+};
+</script>
+
+<!-- Load Google Analytics script immediately -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LLKG1K4C9Y"></script>
