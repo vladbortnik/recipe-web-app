@@ -3,6 +3,10 @@
 migrations/
 my_info/
 /app/static/upload_dir/
+.claude/
+CLAUDE.md
+.qodo/
+.idea/
 
 # General
 .DS_Store
