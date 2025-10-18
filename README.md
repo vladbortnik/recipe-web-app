@@ -1,189 +1,348 @@
-# About
+<div align="center">
 
-**Recipe** is a Web Application that enables users to upload images of whole food items, and generates meal recipes based on the available ingredients.
+# 🍳 Recipe Hub
 
-**Live**: [Recipe Hub](http://recipe.vladbortnik.dev)
+### Turn Ingredients Into Culinary Magic
 
----
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-recipe.vladbortnik.dev-brightgreen?style=for-the-badge&logo=google-chrome)](http://recipe.vladbortnik.dev)
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-## **Implementation:**
+*An AI-powered web application that transforms ingredient photos into personalized recipe recommendations.*
 
-### `TECH STACK`
+[Live Demo](http://recipe.vladbortnik.dev) • [Report Bug](https://github.com/vladbortnik/recipe-web-app/issues) • [Request Feature](https://github.com/vladbortnik/recipe-web-app/issues)
 
-- **Flask**:
-  - A lightweight WSGI web application framework in Python
-  - Essential for routing, content rendering, etc
-
-- **Extensions**:
-  - **Flask-SQLAlchemy**
-    - Integration with SQLAlchemy for ORM capabilities
-  - **Flask-Migrate**
-    - Handles database migrations
-  - **Flask-Bcrypt**
-    - Provides password hashing for security
-  - **Flask-Login**
-    - Handles User Authentication, Session Management, and Protecting Routes
-  - **Flask-WTF**
-    - Used for Form Creation and Handling
-    - Includes Text, Email, Password and File Validations to ensure Data Integrity
-  - **Python-dotenv**
-    - Used for loading environment variables from a `.env` file
-
-- **PostgreSQL**:
-  - A powerful, open-source object-relational database system
-  - Used for storing and managing application data
-
-- **Docker and Docker Compose**:
-  - Fully containerized using Docker Images and `docker compose` for orchestration
-
-- **Gunicorn**:
-  - WSGI Server allows for handling multiple requests concurrently, improving performance and reliability in a production environment
-
-- **Azure Cognitive Services**:
-  - Provides computer vision capabilities to analyze images
-  - Enables automatic ingredient recognition from uploaded images
-
-- **Spoonacular API**:
-  - Integration for fetching recipes based on ingredients
-  - Provides additional recipe-related functionalities
-
-<br> 
-
-### `FEATURES`
-
-- **Frontend and User Interface**:
-  - HTML templates and CSS styles are used to construct a responsive and intuitive user interface
-  - Built using `Jinja2` templating to dynamically render content based on backend data
-
-- **User Authentication and Security**:
-  - Implements `Flask-Login` for user session management
-  - `Bcrypt` is employed for secure password hashing and protection
-
-- **Deployment and Containerization**:
-  - `Dockerfile` defines the app environment using a Python base image, ensuring consistency across deployments
-  - `Docker Compose` manages services, enabling a multi-container architecture that includes a web service and a `PostgreSQL` database
-
-- **API Integration**:
-  - Utilizes external APIs such as `Azure Computer Vision` and `Spoonacular API` to enhance functionality with features like image recognition and recipe retrieval
-  - Utility functions are managed within `utils.py`, ensuring clear code logic and readability
-
-- **Database and Migrations**:
-  - `Flask-Migrate` for handling database migrations
-  - Utilizes `PostgreSQL` for robust data storage
-  - `entrypoint.sh` handles migrations automatically
-
-- **Environment Configuration and Secrets Management**:
-  - Uses `.env` to manage sensitive information and environment variables securely
-  - `config.py` manages environment-dependent configurations and API keys securely
-
-- **Script Automation**:
-  - Automated scripts such as `entrypoint.sh` manage startup processes and dependencies efficiently
-
-- **Network Segregation**:
-  - Implemented Docker network isolation by creating separate `frontend` and `backend networks`
-  - Removed direct host exposure of database `port 5432`, ensuring database access is only possible through internal Docker networks
-  - `Frontend network` for public-facing services
-  - `Backend network` for sensitive services (database)
-  - No exposed database ports to host
-  - `Internal DNS resolution` between containers
-
-- **Load Balancer**:
-  - Deployed multiple instances (`web1`, `web2` and `web3`) of the web app using Docker Compose
-  - Configured for `Load Balancer` (e.g., Nginx, Apache) to distribute incoming requests across multiple instances
-  - Ensured continuous application availability by routing traffic to healthy instances
-  - Demonstrated `fault tolerance` in a multi-instance environment
-  - Improved user experience with faster response times
-
-- **Production Deployment with Gunicorn**:
-  - The application is served using `Gunicorn`, which allows for handling `multiple requests concurrently`, improving performance and reliability in a production environment
-  - `Gunicorn` can be easily configured to work with various worker types and settings to optimize performance based on the deployment needs
-
-<br>
-
-### `SECURITY`
-
-- **Password Encryption**: Utilizes Flask-Bcrypt to hash and securely store user passwords.
-- **Environment Variables**: Manages sensitive information such as the secret key using environment variables to avoid hardcoding credentials.
-- **Access Control**: Protects routes to ensure that only Authenticated Users can access certain pages and perform specific actions.
-- **CSRF Protection**: Uses Flask-WTF to include CSRF (Cross-Site Request Forgery) Tokens in Forms, preventing Unauthorized Actions from being executed.
-- **Network Segregation**: Implemented Docker network isolation by creating separate frontend and backend networks.
-
-<br>
-
-This project combines modern web technologies and external APIs to deliver a rich feature set for recipe enthusiasts. It is designed for easy deployment and scalability in mind, making it a robust choice for culinary exploration.
+</div>
 
 ---
 
-## How to Install
+## 📋 Table of Contents
 
-To set up and run the application using Docker Compose, follow these steps:
-
-1. **Prerequisites**:
-    - Make sure you have Docker and Docker Compose installed on your machine
-    - Virtual Environments are strongly recommended
-
-2. **Clone the repository**:
-
-    ```bash
-    git clone <repository_url>
-    cd <repository_directory>
-    ```
-
-3. **Create an `.env` file**:
-    - Add your environment variables as needed
-    - Example of `.env` file is included
-    - This file will be used for both the web and database services
-
-4. **Build and run the containers**:
-
-    ```bash
-    docker-compose up --build -d
-    ```
-
-5. **Access the application**:
-    - The web application will be accessible at:
-      - http://localhost:5002
-      - http://localhost:5003
-      - http://localhost:5004
-
-6. **Stop running containers**:
-
-    ```bash
-    docker-compose down
-    ```
-
-7. **Database Initialization**:
-   - `entrypoint.sh` handles migrations automatically
-   - There is **NO** need to manually run migrations:
-
-      ```bash
-      flask db init
-      flask db migrate -m "Initial migration."
-      flask db upgrade
-      ```
-
-This setup includes a web application powered by Gunicorn and a PostgreSQL database. The services will automatically restart unless manually stopped.
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Live Demo](#-live-demo)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Security Features](#-security-features)
+- [Performance](#-performance)
+- [Contact](#-contact)
 
 ---
 
-## Access Running Container
+## 🎯 Overview
 
-1. **List running containers**:
+**Recipe Hub** is a production-grade web application that empowers home chefs to discover recipes based on ingredients they already have. Simply upload photos of your ingredients, and let Azure Computer Vision AI identify them automatically. The app then suggests personalized recipes using the Spoonacular API, eliminating food waste and inspiring culinary creativity.
 
+Built with scalability, security, and user experience in mind, Recipe Hub features a load-balanced multi-instance architecture, OAuth integration, and comprehensive security hardening.
+
+---
+
+## ✨ Key Features
+
+### 🤖 **AI-Powered Ingredient Recognition**
+- Upload ingredient photos using Azure Computer Vision API
+- Automatic ingredient identification and tagging
+- Smart ingredient management with virtual pantry
+
+### 🔍 **Intelligent Recipe Discovery**
+- Spoonacular API integration for 1M+ recipes
+- Personalized recommendations based on available ingredients
+- Favorite and save recipes to your account
+- Global cuisine exploration with dietary filters
+
+### 👤 **User Management & Authentication**
+- Traditional email/password signup with email verification
+- Google OAuth 2.0 integration for quick sign-in
+- Secure password reset flow with time-limited tokens
+- Session management with Flask-Login
+
+### 🔐 **Enterprise-Grade Security**
+- Password hashing with Bcrypt
+- CSRF protection on all forms
+- Network segregation with Docker (frontend/backend networks)
+- Environment-based secrets management
+- GDPR-compliant cookie consent
+
+### ⚡ **Production-Ready Architecture**
+- Load-balanced deployment (3 Gunicorn instances)
+- PostgreSQL database with automated migrations
+- Docker Compose orchestration
+- Fault-tolerant multi-instance setup
+- Health monitoring and auto-restart
+
+### 📱 **Modern User Experience**
+- Responsive design with Bootstrap 5
+- Smooth animations using AOS library
+- Google Analytics integration
+- SEO-optimized with meta tags, sitemap, and structured data
+- Progressive enhancement for all devices
+
+---
+
+## 🌐 Live Demo
+
+**Experience Recipe Hub:** [recipe.vladbortnik.dev](http://recipe.vladbortnik.dev)
+
+The application is deployed on a production server with:
+- ✅ Load balancing across 3 instances
+- ✅ SSL/TLS encryption
+- ✅ Automated database migrations
+- ✅ Zero-downtime deployments
+- ✅ Health monitoring
+
+---
+
+## 🛠️ Tech Stack
+
+### **Backend**
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=flat&logo=gunicorn&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)
+
+- **Flask 3.0+**: Lightweight WSGI web framework
+- **Gunicorn**: Production WSGI server for concurrent request handling
+- **PostgreSQL**: Robust relational database
+- **SQLAlchemy**: Pythonic ORM with relationship management
+- **Flask-Migrate**: Alembic-based database migrations
+
+### **Authentication & Security**
+![OAuth](https://img.shields.io/badge/OAuth%202.0-EB5424?style=flat&logo=auth0&logoColor=white)
+
+- **Flask-Login**: User session management
+- **Flask-Bcrypt**: Secure password hashing
+- **Authlib**: Google OAuth 2.0 integration
+- **Flask-WTF**: Form validation & CSRF protection
+- **python-dotenv**: Environment variable management
+
+### **Frontend**
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap_5-7952B3?style=flat&logo=bootstrap&logoColor=white)
+
+- **Jinja2**: Server-side templating engine
+- **Bootstrap 5**: Responsive UI framework
+- **Font Awesome**: Icon library
+- **AOS**: Scroll animation library
+- **Google Fonts**: Typography (Nunito)
+
+### **External APIs**
+![Azure](https://img.shields.io/badge/Azure-0078D4?style=flat&logo=microsoft-azure&logoColor=white)
+
+- **Azure Computer Vision**: AI-powered ingredient recognition from images
+- **Spoonacular API**: Recipe database and nutrition information
+
+### **DevOps & Infrastructure**
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
+
+- **Docker**: Containerization
+- **Docker Compose**: Multi-container orchestration
+- **Nginx**: Reverse proxy and load balancer (upstream deployment)
+- **Git**: Version control
+
+---
+
+## 🏗️ Architecture
+
+### **Multi-Instance Load-Balanced Design**
+
+```
+┌─────────────────────────────────────────────┐
+│            Nginx Load Balancer              │
+│         (Upstream Infrastructure)           │
+└────────────┬────────────┬───────────────────┘
+             │            │
+   ┌─────────┴────┬───────┴────┬─────────────┐
+   │              │             │             │
+┌──▼───┐     ┌───▼──┐     ┌───▼──┐           │
+│ web1 │     │ web2 │     │ web3 │           │
+│:5002 │     │:5003 │     │:5004 │           │
+└──┬───┘     └───┬──┘     └───┬──┘           │
+   │             │             │              │
+   └─────────────┴─────────────┴──────────────┘
+                 │
+          ┌──────▼──────┐
+          │ PostgreSQL  │
+          │  Database   │
+          │   (db:5432) │
+          └─────────────┘
+```
+
+### **Network Segregation**
+- **Frontend Network**: Public-facing web services
+- **Backend Network**: Database access (internal only)
+- **No exposed database ports** to host machine
+- Internal DNS resolution between containers
+
+---
+
+## 📁 Project Structure
+
+```
+recipe-web-app/
+├── app/
+│   ├── __init__.py              # Flask app factory
+│   ├── config.py                # Configuration management
+│   ├── models.py                # SQLAlchemy database models
+│   ├── routes.py                # Application routes & views
+│   ├── forms.py                 # WTForms definitions
+│   ├── utils.py                 # Helper functions (API calls, email)
+│   ├── templates/               # Jinja2 HTML templates
+│   │   ├── layout.html          # Base template (SEO-optimized)
+│   │   ├── index.html           # Landing page
+│   │   ├── dashboard.html       # User dashboard
+│   │   ├── upload.html          # Image upload interface
+│   │   ├── login.html           # Login page
+│   │   ├── signup.html          # Registration page
+│   │   └── ...
+│   └── static/                  # CSS, images, favicon
+│       ├── main.css
+│       ├── robots.txt
+│       └── favicon.ico
+├── migrations/                  # Database migration files
+├── docker-compose.yml           # Multi-container setup
+├── Dockerfile                   # Container definition
+├── entrypoint.sh               # Startup script (migrations)
+├── requirements.txt            # Python dependencies
+├── .env-example                # Environment variables template
+├── GITHUB-ABOUT-SECTION.md     # GitHub repository metadata
+└── README.md                   # This file
+```
+
+---
+
+## 🚀 Getting Started
+
+### **Prerequisites**
+
+- [Docker](https://www.docker.com/get-started) 20.10+
+- [Docker Compose](https://docs.docker.com/compose/install/) 2.0+
+- Python 3.9+ *(optional, for local development)*
+
+### **Installation**
+
+1. **Clone the repository**
    ```bash
-   docker ps
+   git clone https://github.com/vladbortnik/recipe-web-app.git
+   cd recipe-web-app
    ```
 
-2. **Access a Container**:
-
+2. **Set up environment variables**
    ```bash
-   docker exec -it <container_id_or_name> /bin/bash
+   cp .env-example .env
    ```
 
-3. **Docker Logs**:
+   Edit `.env` and add your API keys:
+   ```env
+   SECRET_KEY=your-secret-key
+   DATABASE_URL=postgresql://user:password@db:5432/recipe_db
 
+   # Azure Computer Vision
+   AZURE_VISION_KEY=your-azure-key
+   AZURE_VISION_ENDPOINT=your-azure-endpoint
+
+   # Spoonacular API
+   SPOONACULAR_API_KEY=your-spoonacular-key
+
+   # Google OAuth (optional)
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+   # Email (for password reset)
+   MAIL_SERVER=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USERNAME=your-email@gmail.com
+   MAIL_PASSWORD=your-app-password
+   ```
+
+3. **Build and run with Docker Compose**
    ```bash
-   # Tail the logs 
+   docker-compose up --build -d
+   ```
+
+4. **Access the application**
+   - **Web Instance 1**: http://localhost:5002
+   - **Web Instance 2**: http://localhost:5003
+   - **Web Instance 3**: http://localhost:5004
+
+5. **View logs** (optional)
+   ```bash
    docker-compose logs -f web1 web2 web3
-   docker-compose logs -f db
    ```
+
+6. **Stop the application**
+   ```bash
+   docker-compose down
+   ```
+
+### **Database Migrations**
+
+Migrations are handled automatically by `entrypoint.sh`. No manual intervention required.
+
+For manual migration management:
+```bash
+# Access container
+docker exec -it <container_name> /bin/bash
+
+# Create migration
+flask db migrate -m "Description"
+
+# Apply migration
+flask db upgrade
+```
+
+---
+
+## 🔐 Security Features
+
+| Feature | Implementation | Purpose |
+|---------|---------------|---------|
+| **Password Hashing** | Bcrypt with salt | Secure credential storage |
+| **CSRF Protection** | Flask-WTF tokens | Prevent cross-site attacks |
+| **Network Isolation** | Docker networks | Database not exposed to host |
+| **OAuth 2.0** | Google Sign-In | Secure third-party authentication |
+| **Environment Variables** | python-dotenv | No hardcoded secrets |
+| **Route Protection** | @login_required | Authenticated-only endpoints |
+| **Session Management** | Flask-Login | Secure user sessions |
+| **Email Verification** | Time-limited tokens | Prevent fake accounts |
+
+---
+
+## ⚡ Performance
+
+- **Load Balancing**: 3 Gunicorn worker instances
+- **Concurrent Requests**: 6+ workers per instance (18+ total)
+- **Database Connection Pooling**: SQLAlchemy pool management
+- **Static Asset Caching**: Browser caching headers
+- **Lazy Loading**: AOS animations on scroll
+- **Fault Tolerance**: Auto-restart on failure
+
+---
+
+## 📞 Contact
+
+**Vlad Bortnik** - Software Engineer
+
+[![Portfolio](https://img.shields.io/badge/Portfolio-vladbortnik.dev-0EA5E9?style=for-the-badge&logo=google-chrome&logoColor=white)](https://vladbortnik.dev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vladbortnik)
+[![Twitter](https://img.shields.io/badge/Twitter-@vladbortnik__dev-1DA1F2?style=for-the-badge&logo=x&logoColor=white)](https://x.com/vladbortnik_dev)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vladbortnik)
+
+**Project Link**: [https://github.com/vladbortnik/recipe-web-app](https://github.com/vladbortnik/recipe-web-app)
+
+---
+
+<div align="center">
+
+### 🌟 Built with passion for clean code, robust architecture, and scalable solutions
+
+*Software Engineer | Frontend (React) → Backend (Flask, PostgreSQL) → Infrastructure (Docker, Nginx, Cloud)*
+
+[Portfolio](https://vladbortnik.dev) • [Contact Form](https://vladbortnik.dev/contact.html) • New York, NY 🗽
+
+</div>

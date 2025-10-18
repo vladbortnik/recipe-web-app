@@ -646,3 +646,52 @@ def google_callback() -> 'flask.Response':
         app.logger.error(f'Google OAuth callback error: {str(e)}')
         flash('An error occurred during Google sign-in. Please try again.', 'danger')
         return redirect(url_for('login'))
+
+
+# SEO Routes
+@app.route('/robots.txt')
+def robots_txt() -> 'flask.Response':
+    """Serve the robots.txt file for search engine crawlers.
+
+    Returns:
+        Response: The robots.txt file with proper content type.
+    """
+    return app.send_static_file('robots.txt')
+
+
+@app.route('/sitemap.xml')
+def sitemap_xml() -> 'flask.Response':
+    """Generate and serve the sitemap.xml file for search engines.
+
+    Returns:
+        Response: XML sitemap with all public pages.
+    """
+    from datetime import datetime
+
+    # Define all public pages
+    pages = []
+
+    # Add static pages
+    static_pages = [
+        {'loc': url_for('index', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
+        {'loc': url_for('login', _external=True), 'priority': '0.8', 'changefreq': 'monthly'},
+        {'loc': url_for('signup', _external=True), 'priority': '0.8', 'changefreq': 'monthly'},
+    ]
+
+    pages.extend(static_pages)
+
+    # Generate XML
+    sitemap_xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+
+    for page in pages:
+        sitemap_xml_content += '  <url>\n'
+        sitemap_xml_content += f'    <loc>{page["loc"]}</loc>\n'
+        sitemap_xml_content += f'    <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>\n'
+        sitemap_xml_content += f'    <changefreq>{page["changefreq"]}</changefreq>\n'
+        sitemap_xml_content += f'    <priority>{page["priority"]}</priority>\n'
+        sitemap_xml_content += '  </url>\n'
+
+    sitemap_xml_content += '</urlset>'
+
+    return Response(sitemap_xml_content, mimetype='application/xml')

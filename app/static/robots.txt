@@ -1,0 +1,11 @@
+# robots.txt for Recipe Hub
+
+User-agent: *
+Allow: /
+Disallow: /my-account
+Disallow: /dashboard
+Disallow: /upload
+Disallow: /logout
+
+# Sitemap location
+Sitemap: http://recipe.vladbortnik.dev/sitemap.xml
