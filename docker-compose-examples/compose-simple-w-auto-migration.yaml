@@ -1,0 +1,108 @@
+# =============================================================================
+# Docker Compose - Simple Setup with Auto-Migration
+# =============================================================================
+#
+# PURPOSE:
+#   Single-instance Flask application with PostgreSQL database.
+#   Includes automatic database migration on startup.
+#   Ideal for development, testing, or small-scale production.
+#
+# ARCHITECTURE:
+#   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+#   │  migration  │ ───► │    web1     │ ───► │     db      │
+#   │  (one-time) │      │  (Flask)    │      │ (PostgreSQL)│
+#   └─────────────┘      └─────────────┘      └─────────────┘
+#                              ↑
+#                        Port 5002
+#
+# PREREQUISITES:
+#   1. Docker and Docker Compose installed
+#   2. .env file with required environment variables (see .env-example)
+#
+# USAGE:
+#   # Start all services (first time or after changes)
+#   docker compose -f compose-simple-w-auto-migration.yaml up --build -d
+#
+#   # View logs
+#   docker compose -f compose-simple-w-auto-migration.yaml logs -f
+#
+#   # Stop all services
+#   docker compose -f compose-simple-w-auto-migration.yaml down
+#
+#   # Stop and remove volumes (WARNING: deletes database data)
+#   docker compose -f compose-simple-w-auto-migration.yaml down -v
+#
+# RELATED FILES:
+#   - nginx.conf-examples/nginx-simple-w-auto-migration.conf
+#   - scripts/wait-for-migrations.sh
+#   - scripts/entrypoint.sh
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Flask Web Application
+  # ---------------------------------------------------------------------------
+  web1:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    volumes:
+      - .:/code                                 # Mount source code for development
+    ports:
+      - "5002:5002"                             # Expose Flask app on port 5002
+    env_file:
+      - .env                                    # Load environment variables
+    depends_on:
+      db:
+        condition: service_healthy              # Wait for DB to be ready
+      migration:
+        condition: service_completed_successfully  # Wait for migrations
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Database Migration Service (runs once on startup)
+  # ---------------------------------------------------------------------------
+  migration:
+    build: .
+    command: ./scripts/wait-for-migrations.sh
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"                               # Run once and exit
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage
+    env_file:
+      - .env                                    # POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+    ports:
+      - "5432:5432"                             # Expose for local development
+                                                # NOTE: Remove in production!
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# -----------------------------------------------------------------------------
+# Persistent Volumes
+# -----------------------------------------------------------------------------
+volumes:
+  postgres_data:                                # Named volume for database persistence
+    driver: local

@@ -1,0 +1,221 @@
+# =============================================================================
+# Docker Compose - Load Balancer with Network Segregation
+# =============================================================================
+#
+# PURPOSE:
+#   Production-grade multi-instance deployment with:
+#   - 3 Flask application instances for load balancing
+#   - Network segregation (frontend/backend isolation)
+#   - Resource limits for container management
+#   - Database isolation (not exposed to host)
+#
+# ARCHITECTURE:
+#   ┌─────────────────── Frontend Network ───────────────────┐
+#   │                                                        │
+#   │  ┌────────┐      ┌────────┐      ┌────────┐           │
+#   │  │  web1  │      │  web2  │      │  web3  │           │
+#   │  │ :5002  │      │ :5003  │      │ :5004  │           │
+#   │  └───┬────┘      └───┬────┘      └───┬────┘           │
+#   │      │               │               │                 │
+#   └──────┼───────────────┼───────────────┼─────────────────┘
+#          │               │               │
+#   ┌──────┼───────────────┼───────────────┼─────────────────┐
+#   │      │               │               │                 │
+#   │      └───────────────┴───────────────┘                 │
+#   │                      │                                 │
+#   │              ┌───────▼───────┐                         │
+#   │              │      db       │   Backend Network       │
+#   │              │  (PostgreSQL) │   (Internal Only)       │
+#   │              │    :5432      │                         │
+#   │              └───────────────┘                         │
+#   │                                                        │
+#   └─────────────────── Backend Network ────────────────────┘
+#
+# SECURITY FEATURES:
+#   - Database port NOT exposed to host (internal network only)
+#   - Network segregation prevents direct external DB access
+#   - Resource limits prevent container resource exhaustion
+#
+# PREREQUISITES:
+#   1. Docker and Docker Compose installed
+#   2. .env file with required environment variables
+#   3. Nginx configured with upstream load balancing
+#
+# USAGE:
+#   # Start all services
+#   docker compose -f compose-w-Load-Balancer-n-Network-Segregation.yaml up --build -d
+#
+#   # Scale web instances (alternative to defining multiple services)
+#   # docker compose up --scale web=3 -d
+#
+#   # View logs for all web instances
+#   docker compose -f compose-w-Load-Balancer-n-Network-Segregation.yaml logs -f web1 web2 web3
+#
+#   # Check container resource usage
+#   docker stats
+#
+# RELATED FILES:
+#   - nginx.conf-examples/nginx-w-Load-Balancer.conf
+#   - scripts/entrypoint.sh
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Network Configuration
+# -----------------------------------------------------------------------------
+networks:
+  frontend:
+    driver: bridge
+    # Public-facing network for web services
+    # Allows external traffic to reach Flask instances
+    
+  backend:
+    driver: bridge
+    internal: true
+    # Private network for database communication
+    # 'internal: true' prevents external access - containers can only
+    # communicate with each other, not with the outside world
+
+# -----------------------------------------------------------------------------
+# Services
+# -----------------------------------------------------------------------------
+services:
+  # ---------------------------------------------------------------------------
+  # Web Application Instance 1
+  # ---------------------------------------------------------------------------
+  web1:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    # NOTE: Shared volumes disabled to prevent conflicts with multiple instances
+    # volumes:
+    #   - .:/code
+    networks:
+      - frontend                                # External access
+      - backend                                 # Database access
+    ports:
+      - "5002:5002"                             # host:container
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    # Resource Limits (adjust based on your server capacity)
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Web Application Instance 2
+  # ---------------------------------------------------------------------------
+  web2:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "5003:5002"                             # Maps host:5003 → container:5002
+    env_file:                                   # Must match nginx upstream config
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Web Application Instance 3
+  # ---------------------------------------------------------------------------
+  web3:
+    build: .
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "5004:5002"                             # Maps host:5004 → container:5002
+    env_file:                                   # Must match nginx upstream config
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Database Migration Service (Optional - use for initial setup)
+  # ---------------------------------------------------------------------------
+  # Uncomment this service when you need to run database migrations.
+  # Note: With multiple instances, run migrations separately to avoid conflicts.
+  #
+  # migration:
+  #   build: .
+  #   command: ./scripts/wait-for-migrations.sh
+  #   volumes:
+  #     - .:/code
+  #   networks:
+  #     - backend
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database (Backend Network Only)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - backend                                 # Internal network only
+    # SECURITY: Port intentionally NOT exposed to host
+    # Database is only accessible from containers on the backend network
+    # ports:
+    #   - "5432:5432"                           # DO NOT expose in production!
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# -----------------------------------------------------------------------------
+# Persistent Volumes
+# -----------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+    # Persistent storage for PostgreSQL data
+    # Data survives container restarts and rebuilds

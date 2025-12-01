@@ -671,25 +671,51 @@ def robots_txt() -> 'flask.Response':
 @app.route('/sitemap.xml')
 def sitemap_xml() -> 'flask.Response':
     """Generate and serve the sitemap.xml file for search engines.
-
+    
+    This endpoint generates a dynamic XML sitemap containing all public pages
+    of the application. The sitemap helps search engines discover and index
+    the site's content more efficiently.
+    
+    Sitemap Protocol Reference: https://www.sitemaps.org/protocol.html
+    
     Returns:
-        Response: XML sitemap with all public pages.
+        Response: XML sitemap with all public pages, including:
+            - Home page (highest priority)
+            - Authentication pages (login, signup, forgot password)
+            
+    Note:
+        Private pages (dashboard, my-account, etc.) are excluded as they
+        require authentication and should not be indexed by search engines.
     """
     from datetime import datetime
 
-    # Define all public pages
-    pages = []
-
-    # Add static pages
-    static_pages = [
-        {'loc': url_for('index', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
-        {'loc': url_for('login', _external=True), 'priority': '0.8', 'changefreq': 'monthly'},
-        {'loc': url_for('signup', _external=True), 'priority': '0.8', 'changefreq': 'monthly'},
+    # Define all public pages with SEO metadata
+    # Priority: 1.0 = most important, 0.0 = least important
+    # Changefreq: how often the page content typically changes
+    pages = [
+        {
+            'loc': url_for('index', _external=True),
+            'priority': '1.0',
+            'changefreq': 'daily'
+        },
+        {
+            'loc': url_for('login', _external=True),
+            'priority': '0.8',
+            'changefreq': 'monthly'
+        },
+        {
+            'loc': url_for('signup', _external=True),
+            'priority': '0.8',
+            'changefreq': 'monthly'
+        },
+        {
+            'loc': url_for('forgot_password', _external=True),
+            'priority': '0.5',
+            'changefreq': 'monthly'
+        },
     ]
 
-    pages.extend(static_pages)
-
-    # Generate XML
+    # Generate XML following sitemap protocol
     sitemap_xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 

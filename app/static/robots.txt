@@ -1,11 +1,54 @@
-# robots.txt for Recipe Hub
+# =============================================================================
+# robots.txt - Search Engine Crawler Instructions
+# =============================================================================
+#
+# PURPOSE:
+#   This file tells search engine crawlers which pages to index and which
+#   to ignore. It's essential for SEO and protecting private user pages
+#   from appearing in search results.
+#
+# LOCATION:
+#   - Standard: Must be served at domain root (e.g., https://example.com/robots.txt)
+#   - This Flask app: Physical file is at 'app/static/robots.txt', but served
+#     at '/robots.txt' via Flask route in 'app/routes.py'
+#   - Search engines only care about the URL, not where the file lives on disk
+#
+# RULES:
+#   - Allow: Pages that should be indexed by search engines
+#   - Disallow: Private pages that should not appear in search results
+#
+# VERIFICATION:
+#   Test at: https://www.google.com/webmasters/tools/robots-testing-tool
+#
+# =============================================================================
 
+# Default rules for all search engine crawlers
 User-agent: *
+
+# Public pages - allowed for indexing
 Allow: /
+Allow: /login
+Allow: /signup
+Allow: /forgot-password
+
+# Private/authenticated pages - blocked from indexing
 Disallow: /my-account
 Disallow: /dashboard
 Disallow: /upload
 Disallow: /logout
+Disallow: /favorites
+Disallow: /verify-email/
+Disallow: /password-reset/
+Disallow: /resend-verification/
+Disallow: /toggle-favorite
+Disallow: /get-favorites
+Disallow: /send-password-reset
+Disallow: /auth/
 
-# Sitemap location
-Sitemap: http://recipe.vladbortnik.dev/sitemap.xml
+# Sitemap location (helps search engines discover all pages)
+Sitemap: https://recipe.vladbortnik.dev/sitemap.xml
+
+# NOTE: Crawl-delay is NOT supported by Google. Only Bing and Yandex honor it.
+# If you need to limit Bing's crawl rate, uncomment below:
+# User-agent: Bingbot
+# Crawl-delay: 1

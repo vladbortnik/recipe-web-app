@@ -1,160 +1,38 @@
 services:
-  # Nginx Load Balancer (Upstream Infrastructure)
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - web1
-      - web2
-      - web3
-    networks:
-      - frontend
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Web Application Instance 1
   web1:
     build: .
-    command: flask run --host=0.0.0.0 --port=5002
+    command: gunicorn -w 4 -b 0.0.0.0:5002 run:app
     volumes:
       - .:/code
+    ports:
+      - "5002:5002"
     env_file:
       - .env
     depends_on:
       - db
-    networks:
-      - frontend
-      - backend
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 384M
-        reservations:
-          cpus: '0.15'
-          memory: 192M
+    # - migration
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  # Web Application Instance 2
-  web2:
-    build: .
-    command: flask run --host=0.0.0.0 --port=5003
-    volumes:
-      - .:/code
-    env_file:
-      - .env
-    depends_on:
-      - db
-    networks:
-      - frontend
-      - backend
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 384M
-        reservations:
-          cpus: '0.15'
-          memory: 192M
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # migration:
+  #   build: .
+  #   command: ./scripts/wait-for-migrations.sh
+  #   volumes:
+  #     - .:/code
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db
+  #   restart: "no"
 
-  # Web Application Instance 3
-  web3:
-    build: .
-    command: flask run --host=0.0.0.0 --port=5004
-    volumes:
-      - .:/code
-    env_file:
-      - .env
-    depends_on:
-      - db
-    networks:
-      - frontend
-      - backend
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 384M
-        reservations:
-          cpus: '0.15'
-          memory: 192M
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # PostgreSQL Database (Backend Network - Internal Only)
   db:
     image: postgres:16.4
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-    networks:
-      - backend
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+    ports:
+      - "5432:5432"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-# Network Segregation
-networks:
-  frontend:
-    driver: bridge
-    name: recipe_frontend
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-  backend:
-    driver: bridge
-    name: recipe_backend
-    internal: false  # Set to true for complete isolation (no internet access)
-    ipam:
-      config:
-        - subnet: 172.21.0.0/16
 
 volumes:
   postgres_data:
