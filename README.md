@@ -10,7 +10,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-*An AI-powered web application that transforms ingredient photos into personalized recipe recommendations.*
+_An AI-powered web application that transforms ingredient photos into personalized recipe recommendations._
 
 [Live Demo](http://recipe.vladbortnik.dev) • [Report Bug](https://github.com/vladbortnik/recipe-web-app/issues) • [Request Feature](https://github.com/vladbortnik/recipe-web-app/issues)
 
@@ -29,7 +29,7 @@
 - [Getting Started](#-getting-started)
 - [Security Features](#-security-features)
 - [Performance](#-performance)
-- [Contact](#-contact)
+- [Connect With Me](#-connect-with-me)
 
 ---
 
@@ -44,23 +44,27 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 ## ✨ Key Features
 
 ### 🤖 **AI-Powered Ingredient Recognition**
+
 - Upload ingredient photos using Azure Computer Vision API
 - Automatic ingredient identification and tagging
 - Smart ingredient management with virtual pantry
 
 ### 🔍 **Intelligent Recipe Discovery**
+
 - Spoonacular API integration for 1M+ recipes
 - Personalized recommendations based on available ingredients
 - Favorite and save recipes to your account
 - Global cuisine exploration with dietary filters
 
 ### 👤 **User Management & Authentication**
+
 - Traditional email/password signup with email verification
 - Google OAuth 2.0 integration for quick sign-in
 - Secure password reset flow with time-limited tokens
 - Session management with Flask-Login
 
 ### 🔐 **Enterprise-Grade Security**
+
 - Password hashing with Bcrypt
 - CSRF protection on all forms
 - Network segregation with Docker (frontend/backend networks)
@@ -68,6 +72,7 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 - GDPR-compliant cookie consent
 
 ### ⚡ **Production-Ready Architecture**
+
 - Load-balanced deployment (3 Gunicorn instances)
 - PostgreSQL database with automated migrations
 - Docker Compose orchestration
@@ -75,6 +80,7 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 - Health monitoring and auto-restart
 
 ### 📱 **Modern User Experience**
+
 - Responsive design with Bootstrap 5
 - Smooth animations using AOS library
 - Google Analytics integration
@@ -88,6 +94,7 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 **Experience Recipe Hub:** [recipe.vladbortnik.dev](http://recipe.vladbortnik.dev)
 
 The application is deployed on a production server with:
+
 - ✅ Load balancing across 3 instances
 - ✅ SSL/TLS encryption
 - ✅ Automated database migrations
@@ -99,6 +106,7 @@ The application is deployed on a production server with:
 ## 🛠️ Tech Stack
 
 ### **Backend**
+
 ![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=flat&logo=gunicorn&logoColor=white)
@@ -111,6 +119,7 @@ The application is deployed on a production server with:
 - **Flask-Migrate**: Alembic-based database migrations
 
 ### **Authentication & Security**
+
 ![OAuth](https://img.shields.io/badge/OAuth%202.0-EB5424?style=flat&logo=auth0&logoColor=white)
 
 - **Flask-Login**: User session management
@@ -120,6 +129,7 @@ The application is deployed on a production server with:
 - **python-dotenv**: Environment variable management
 
 ### **Frontend**
+
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap_5-7952B3?style=flat&logo=bootstrap&logoColor=white)
@@ -131,12 +141,14 @@ The application is deployed on a production server with:
 - **Google Fonts**: Typography (Nunito)
 
 ### **External APIs**
+
 ![Azure](https://img.shields.io/badge/Azure-0078D4?style=flat&logo=microsoft-azure&logoColor=white)
 
 - **Azure Computer Vision**: AI-powered ingredient recognition from images
 - **Spoonacular API**: Recipe database and nutrition information
 
 ### **DevOps & Infrastructure**
+
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
 
@@ -174,6 +186,7 @@ The application is deployed on a production server with:
 ```
 
 ### **Network Segregation**
+
 - **Frontend Network**: Public-facing web services
 - **Backend Network**: Database access (internal only)
 - **No exposed database ports** to host machine
@@ -222,22 +235,25 @@ recipe-web-app/
 
 - [Docker](https://www.docker.com/get-started) 20.10+
 - [Docker Compose](https://docs.docker.com/compose/install/) 2.0+
-- Python 3.9+ *(optional, for local development)*
+- Python 3.9+ _(optional, for local development)_
 
 ### **Installation**
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/vladbortnik/recipe-web-app.git
    cd recipe-web-app
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp .env-example .env
    ```
 
    Edit `.env` and add your API keys:
+
    ```env
    SECRET_KEY=your-secret-key
    DATABASE_URL=postgresql://user:password@db:5432/recipe_db
@@ -261,6 +277,7 @@ recipe-web-app/
    ```
 
 3. **Build and run with Docker Compose**
+
    ```bash
    docker-compose up --build -d
    ```
@@ -271,6 +288,7 @@ recipe-web-app/
    - **Web Instance 3**: http://localhost:5004
 
 5. **View logs** (optional)
+
    ```bash
    docker-compose logs -f web1 web2 web3
    ```
@@ -285,6 +303,7 @@ recipe-web-app/
 Migrations are handled automatically by `entrypoint.sh`. No manual intervention required.
 
 For manual migration management:
+
 ```bash
 # Access container
 docker exec -it <container_name> /bin/bash
@@ -300,16 +319,16 @@ flask db upgrade
 
 ## 🔐 Security Features
 
-| Feature | Implementation | Purpose |
-|---------|---------------|---------|
-| **Password Hashing** | Bcrypt with salt | Secure credential storage |
-| **CSRF Protection** | Flask-WTF tokens | Prevent cross-site attacks |
-| **Network Isolation** | Docker networks | Database not exposed to host |
-| **OAuth 2.0** | Google Sign-In | Secure third-party authentication |
-| **Environment Variables** | python-dotenv | No hardcoded secrets |
-| **Route Protection** | @login_required | Authenticated-only endpoints |
-| **Session Management** | Flask-Login | Secure user sessions |
-| **Email Verification** | Time-limited tokens | Prevent fake accounts |
+| Feature                   | Implementation      | Purpose                           |
+| ------------------------- | ------------------- | --------------------------------- |
+| **Password Hashing**      | Bcrypt with salt    | Secure credential storage         |
+| **CSRF Protection**       | Flask-WTF tokens    | Prevent cross-site attacks        |
+| **Network Isolation**     | Docker networks     | Database not exposed to host      |
+| **OAuth 2.0**             | Google Sign-In      | Secure third-party authentication |
+| **Environment Variables** | python-dotenv       | No hardcoded secrets              |
+| **Route Protection**      | @login_required     | Authenticated-only endpoints      |
+| **Session Management**    | Flask-Login         | Secure user sessions              |
+| **Email Verification**    | Time-limited tokens | Prevent fake accounts             |
 
 ---
 
@@ -324,25 +343,33 @@ flask db upgrade
 
 ---
 
-## 📞 Contact
+## 🤝 Connect With Me
 
-**Vlad Bortnik** - Software Engineer
+<div align="center">
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-vladbortnik.dev-0EA5E9?style=for-the-badge&logo=google-chrome&logoColor=white)](https://vladbortnik.dev)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vladbortnik)
 [![Twitter](https://img.shields.io/badge/Twitter-@vladbortnik__dev-1DA1F2?style=for-the-badge&logo=x&logoColor=white)](https://x.com/vladbortnik_dev)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vladbortnik)
 
-**Project Link**: [https://github.com/vladbortnik/recipe-web-app](https://github.com/vladbortnik/recipe-web-app)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vladbortnik)
+[![Contact Me](https://img.shields.io/badge/Contact-Me-4B5563?style=for-the-badge&logo=gmail&logoColor=white)](https://vladbortnik.dev/contact.html)
+
+<!-- [![Get In Touch](https://img.shields.io/badge/Get%20In%20Touch-Online-22C55E?style=for-the-badge&logo=wechat&logoColor=white)](https://vladbortnik.dev/contact.html) -->
+
+**Built with real production experience by [Vlad Bortnik](https://vladbortnik.dev)**
 
 ---
 
 <div align="center">
 
-### 🌟 Built with passion for clean code, robust architecture, and scalable solutions
+### 🌟 **Built with a passion for clean code, robust architecture, and scalable solutions**
 
-*Software Engineer | Frontend (React) → Backend (Flask, PostgreSQL) → Infrastructure (Docker, Nginx, Cloud)*
+_Software Engineer | Frontend (React 19) → Backend (Flask, PostgreSQL) → Infrastructure (Docker, Nginx, Cloud)_
 
-[Portfolio](https://vladbortnik.dev) • [Contact Form](https://vladbortnik.dev/contact.html) • New York, NY 🗽
+**[vladbortnik.dev](https://vladbortnik.dev)** • **[Contact](https://vladbortnik.dev/contact.html)** • **CS degree** • **NYC 🗽**
+
+---
+
+_Last updated: December 2025_
 
 </div>
