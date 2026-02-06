@@ -217,7 +217,7 @@ def login() -> 'flask.Response':
             return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
         
         user = User.query.filter_by(email=form.email.data).first()
-        if not user or not bcrypt.check_password_hash(user.password, form.password.data):
+        if not user or not user.password or not bcrypt.check_password_hash(user.password, form.password.data):
             flash('Invalid email or password.', 'danger')
             return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
         # Check if user has verified their email

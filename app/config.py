@@ -15,14 +15,13 @@ class Config:
     SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY')
 
     # Session & Cookie Security
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = not DEBUG
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = not DEBUG
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = 'Lax'
-    WTF_CSRF_SSL_STRICT = True
-    SESSION_COOKIE_SECURE = True
+    WTF_CSRF_SSL_STRICT = not DEBUG
     
     
     # Flask-Mail configuration

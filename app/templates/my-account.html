@@ -1,13 +1,15 @@
-{% extends 'layout.html' %}
-{% block title %}My Account | Recipe Hub{% endblock %}
-{% block content %}
+{% extends 'layout.html' %} {% block title %}My Account | Recipe Hub{% endblock %} {% block content
+%}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-6">
       <div class="card shadow-lg border-0">
         <div class="card-body p-4">
           <div class="d-flex flex-column align-items-center mb-4">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+            <div
+              class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3"
+              style="width: 80px; height: 80px; font-size: 2.5rem"
+            >
               <i class="fas fa-user-circle"></i>
             </div>
             <h2 class="fw-bold mb-1">Account Overview</h2>
@@ -18,28 +20,55 @@
             <div class="col-12 col-md-6 mb-3 mb-md-0">
               <div class="form-group">
                 <label class="form-label fw-semibold" for="userEmail">Email address</label>
-                <input type="email" id="userEmail" class="form-control-plaintext ps-0 fw-bold text-dark" value="{{ current_user.email }}" readonly aria-label="Email address">
+                <input
+                  type="email"
+                  id="userEmail"
+                  class="form-control-plaintext ps-0 fw-bold text-dark"
+                  value="{{ current_user.email }}"
+                  readonly
+                  aria-label="Email address"
+                />
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="form-group">
                 <label class="form-label fw-semibold" for="createdAt">Account Created</label>
-                <input type="text" id="createdAt" class="form-control-plaintext ps-0 fw-bold text-dark" value="{{ current_user.date_created.strftime('%b %d, %Y') if current_user.date_created else '-' }}" readonly aria-label="Account creation date">
+                <input
+                  type="text"
+                  id="createdAt"
+                  class="form-control-plaintext ps-0 fw-bold text-dark"
+                  value="{{ current_user.date_created.strftime('%b %d, %Y') if current_user.date_created else '-' }}"
+                  readonly
+                  aria-label="Account creation date"
+                />
               </div>
             </div>
           </div>
 
-          <hr class="my-4">
+          <hr class="my-4" />
 
           <div class="mb-4">
             <h5 class="fw-semibold mb-2"><i class="fas fa-key me-2"></i>Reset Password</h5>
-            <p class="text-muted mb-3">For your security, you can request a password reset link to be sent to your email address.</p>
-            <form method="POST" action="{{ url_for('send_password_reset') }}" class="d-flex flex-column flex-sm-row align-items-center gap-2">
+            <p class="text-muted mb-3">
+              For your security, you can request a password reset link to be sent to your email
+              address.
+            </p>
+            <form
+              method="POST"
+              action="{{ url_for('send_password_reset') }}"
+              class="d-flex flex-column flex-sm-row align-items-center gap-2"
+            >
               {{ form.csrf_token }}
               <button type="submit" class="btn btn-primary btn-lg px-4">
                 <i class="fas fa-envelope me-2"></i>Send Password Reset Link
               </button>
             </form>
+          </div>
+
+          <div class="mb-4">
+            <a href="{{ url_for('favorites') }}" class="btn btn-outline-warning w-100 mb-2">
+              <i class="fas fa-star me-1"></i>View My Favorite Recipes
+            </a>
           </div>
 
           <div class="text-center mt-4">
@@ -53,9 +82,3 @@
   </div>
 </div>
 {% endblock %}
-
-<div class="mb-4">
-  <a href="{{ url_for('favorites') }}" class="btn btn-outline-warning w-100 mb-2">
-    <i class="fas fa-star me-1"></i>View My Favorite Recipes
-  </a>
-</div>

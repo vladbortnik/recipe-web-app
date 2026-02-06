@@ -20,7 +20,9 @@ from flask_limiter.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address)
 
-from flask_wtf.csrf import generate_csrf
+from flask_wtf.csrf import CSRFProtect, generate_csrf
+
+csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
@@ -34,6 +36,7 @@ def create_app():
     login_manager.login_message_category = "info"
     mail.init_app(app)
     limiter.init_app(app)
+    csrf.init_app(app)
 
     @app.context_processor
     def inject_csrf_token():

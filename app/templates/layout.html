@@ -1,68 +1,108 @@
 <!-- templates/layout.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="{% block meta_description %}Recipe Hub - Turn ingredients into culinary magic. Upload photos of your ingredients, get personalized recipe suggestions powered by AI. Free forever.{% endblock %}">
-    <meta name="keywords" content="recipe finder, ingredient search, recipe suggestions, AI recipe generator, cooking app, meal planning, food recipes, cooking inspiration">
-    <meta name="author" content="Vlad Bortnik">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{{ request.url }}">
+    <meta
+      name="description"
+      content="{% block meta_description %}Recipe Hub - Turn ingredients into culinary magic. Upload photos of your ingredients, get personalized recipe suggestions powered by AI. Free forever.{% endblock %}"
+    />
+    <meta
+      name="keywords"
+      content="recipe finder, ingredient search, recipe suggestions, AI recipe generator, cooking app, meal planning, food recipes, cooking inspiration"
+    />
+    <meta name="author" content="Vlad Bortnik" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="{{ request.url }}" />
 
     <!-- Open Graph Meta Tags (for Facebook, LinkedIn, etc.) -->
-    <meta property="og:title" content="{% block og_title %}Recipe Hub - Turn Ingredients Into Culinary Magic{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Upload photos of your ingredients and get personalized recipe suggestions powered by AI. Join 10,000+ food lovers. Free forever.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
-    <meta property="og:url" content="{{ request.url }}">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Recipe Hub">
-    <meta property="og:locale" content="en_US">
+    <meta
+      property="og:title"
+      content="{% block og_title %}Recipe Hub - Turn Ingredients Into Culinary Magic{% endblock %}"
+    />
+    <meta
+      property="og:description"
+      content="{% block og_description %}Upload photos of your ingredients and get personalized recipe suggestions powered by AI. Join 10,000+ food lovers. Free forever.{% endblock %}"
+    />
+    <meta
+      property="og:image"
+      content="{% block og_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}"
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Recipe Hub" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@vladbortnik_dev">
-    <meta name="twitter:creator" content="@vladbortnik_dev">
-    <meta name="twitter:title" content="{% block twitter_title %}Recipe Hub - Turn Ingredients Into Culinary Magic{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Upload photos of your ingredients and get personalized recipe suggestions powered by AI. Free forever.{% endblock %}">
-    <meta name="twitter:image" content="{% block twitter_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@vladbortnik_dev" />
+    <meta name="twitter:creator" content="@vladbortnik_dev" />
+    <meta
+      name="twitter:title"
+      content="{% block twitter_title %}Recipe Hub - Turn Ingredients Into Culinary Magic{% endblock %}"
+    />
+    <meta
+      name="twitter:description"
+      content="{% block twitter_description %}Upload photos of your ingredients and get personalized recipe suggestions powered by AI. Free forever.{% endblock %}"
+    />
+    <meta
+      name="twitter:image"
+      content="{% block twitter_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}"
+    />
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#0EA5E9">
-    <meta name="application-name" content="Recipe Hub">
+    <meta name="theme-color" content="#0EA5E9" />
+    <meta name="application-name" content="Recipe Hub" />
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <!-- Google Fonts -->
     <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
-    <link rel="preconnect" href="https://fonts.googleapis">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"> -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
     <!-- Clean background styling -->
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+      body {
+        background-color: #f8f9fa;
+      }
     </style>
-    <link rel="icon" type="image/x-icon" sizes="16x16 32x32" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link
+      rel="icon"
+      type="image/x-icon"
+      sizes="16x16 32x32"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
     <title>{% block title %}Recipe Hub{% endblock %} | Turn Ingredients Into Culinary Magic</title>
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
-    {
+      {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Recipe Hub",
@@ -71,147 +111,165 @@
         "operatingSystem": "Web",
         "description": "Turn ingredients into culinary magic. Upload photos of your ingredients and get personalized recipe suggestions powered by AI.",
         "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
         },
         "creator": {
-            "@type": "Person",
-            "name": "Vlad Bortnik",
-            "url": "https://vladbortnik.dev"
+          "@type": "Person",
+          "name": "Vlad Bortnik",
+          "url": "https://vladbortnik.dev"
         },
         "featureList": [
-            "AI-Powered Ingredient Recognition",
-            "Smart Recipe Search",
-            "Personal Recipe Organization",
-            "Image Upload",
-            "Global Cuisine Database"
+          "AI-Powered Ingredient Recognition",
+          "Smart Recipe Search",
+          "Personal Recipe Organization",
+          "Image Upload",
+          "Global Cuisine Database"
         ]
-    }
+      }
     </script>
 
     {% block head %}{% endblock %}
 
     <!-- Cookie Consent CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css"
+    />
 
-    <!-- Umami Analytics  -->
-    <script defer src="https://analytics.vladbortnik.dev/script.js" data-website-id="2f49fafc-c760-47e1-a03e-2555cc630c2e"></script>
-</head>
+    <!-- Umami Analytics (loaded after page load to avoid blocking the browser spinner) -->
+    <script>
+      window.addEventListener("load", function () {
+        var s = document.createElement("script");
+        s.src = "https://analytics.vladbortnik.dev/script.js";
+        s.setAttribute("data-website-id", "2f49fafc-c760-47e1-a03e-2555cc630c2e");
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    </script>
+  </head>
 
-<body>
+  <body>
     <header class="site-header">
-        <nav class="navbar navbar-expand-lg fixed-top">
-            <div class="container">
-                <a class="navbar-brand" href="/">
-                    <i class="fas fa-utensils me-2"></i>Recipe Hub
+      <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="/"> <i class="fas fa-utensils me-2"></i>Recipe Hub </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                  <i class="fas fa-chart-pie me-1"></i>Dashboard
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('dashboard') }}">
-                                <i class="fas fa-chart-pie me-1"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('upload') }}">
-                                <i class="fas fa-cloud-upload-alt me-1"></i>Upload
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="d-flex">
-                        {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('my_account') }}"
-                            class="btn btn-outline-primary me-2 d-none d-md-inline-flex">
-                            <i class="fas fa-user-circle me-1"></i>My Account
-                        </a>
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                        {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-outline-secondary me-2">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
-                        </a>
-                        <a href="{{ url_for('signup') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-1"></i>Sign Up
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('upload') }}">
+                  <i class="fas fa-cloud-upload-alt me-1"></i>Upload
+                </a>
+              </li>
+            </ul>
+            <div class="d-flex">
+              {% if current_user.is_authenticated %}
+              <a
+                href="{{ url_for('my_account') }}"
+                class="btn btn-outline-primary me-2 d-none d-md-inline-flex"
+              >
+                <i class="fas fa-user-circle me-1"></i>My Account
+              </a>
+              <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+              </a>
+              {% else %}
+              <a href="{{ url_for('login') }}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-sign-in-alt me-1"></i>Login
+              </a>
+              <a href="{{ url_for('signup') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus me-1"></i>Sign Up
+              </a>
+              {% endif %}
             </div>
-        </nav>
+          </div>
+        </div>
+      </nav>
     </header>
 
     <main role="main" class="container mt-4 pt-2">
-        <div class="row">
-            <div id="mainCol" class="col">
-                <!-- Leave this div "as is". -->
-            </div>
+      <div class="row">
+        <div id="mainCol" class="col">
+          <!-- Leave this div "as is". -->
         </div>
+      </div>
 
-        <!-- Flash messages with improved styling -->
-        {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-        <div class="row mb-4" data-aos="fade-down" data-aos-duration="800">
-            <div class="col-12">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} shadow-sm">
-                    {% if category == 'success' %}
-                    <i class="fas fa-check-circle me-2"></i>
-                    {% elif category == 'danger' or category == 'error' %}
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    {% elif category == 'warning' %}
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    {% elif category == 'info' %}
-                    <i class="fas fa-info-circle me-2"></i>
-                    {% endif %}
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
+      <!-- Flash messages with improved styling -->
+      {% with messages = get_flashed_messages(with_categories=True) %} {% if messages %}
+      <div class="row mb-4" data-aos="fade-down" data-aos-duration="800">
+        <div class="col-12">
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} shadow-sm">
+            {% if category == 'success' %}
+            <i class="fas fa-check-circle me-2"></i>
+            {% elif category == 'danger' or category == 'error' %}
+            <i class="fas fa-exclamation-circle me-2"></i>
+            {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {% elif category == 'info' %}
+            <i class="fas fa-info-circle me-2"></i>
+            {% endif %} {{ message }}
+          </div>
+          {% endfor %}
         </div>
-        {% endif %}
-        {% endwith %}
+      </div>
+      {% endif %} {% endwith %}
 
-        <!-- Main content -->
-        <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
-            {% block content %}{% endblock %}
-        </div>
+      <!-- Main content -->
+      <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+        {% block content %}{% endblock %}
+      </div>
     </main>
 
     <!-- Footer -->
     <footer class="bg-dark text-white pt-2 pb-3 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- <h5><i class="fas fa-utensils me-2"></i>Recipe Hub</h5> -->
-                    <!-- <p class="small">Your ultimate recipe management solution.</p> -->
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <h5><i class="fas fa-utensils me-2"></i>Recipe Hub</h5>
-                    <p class="small mb-0"> 2025 Recipe Hub. All rights reserved.</p>
-                </div>
-            </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <!-- <h5><i class="fas fa-utensils me-2"></i>Recipe Hub</h5> -->
+            <!-- <p class="small">Your ultimate recipe management solution.</p> -->
+          </div>
+          <div class="col-md-6 text-md-end">
+            <h5><i class="fas fa-utensils me-2"></i>Recipe Hub</h5>
+            <p class="small mb-0">2025 Recipe Hub. All rights reserved.</p>
+          </div>
         </div>
+      </div>
     </footer>
 
     <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
     <!-- AOS Animation Library -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize AOS animation library
-            AOS.init({
-                once: true
-            });
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize AOS animation library
+        AOS.init({
+          once: true,
         });
+      });
     </script>
 
     <!-- Custom scripts -->
@@ -221,87 +279,90 @@
     {% include 'google-analytics.html' %}
 
     <!-- Cookie Consent Script -->
-    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"
+      data-cfasync="false"
+    ></script>
     <script>
-        window.cookieconsent.initialise({
-            "palette": {
-                "popup": {
-                    "background": "#1d2c4d",
-                    "text": "#ffffff"
-                },
-                "button": {
-                    "background": "#f1d600",
-                    "text": "#000000"
-                }
-            },
-            "theme": "classic",
-            "position": "bottom-right",
-            "type": "opt-in",  // Changed to opt-in for 2024 compliance
-            "content": {
-                "message": "We use cookies to improve your experience and analyze site usage. This includes analytics cookies that help us understand how you interact with our recipes.",
-                "dismiss": "Accept All Cookies",
-                "deny": "Decline Analytics",
-                "link": "Privacy Policy",
-                "href": "/privacy"  // You should create this page
-            },
-            "law": {
-                "regionalLaw": true,
-                "countryCode": "EU"  // Enables stricter EU/GDPR compliance
-            },
-            "onStatusChange": function(status, chosenBefore) {
-                var consentGranted = this.hasConsented();
-                
-                // Update Google Consent Mode v2
-                if (window.updateGoogleConsent) {
-                    window.updateGoogleConsent(consentGranted);
-                }
-                
-                // Legacy support for loadGoogleAnalytics function
-                if (consentGranted && window.loadGoogleAnalytics) {
-                    window.loadGoogleAnalytics();
-                }
-                
-                // Log consent change for debugging
-                console.log('Cookie consent status changed:', consentGranted ? 'granted' : 'denied');
-            },
-            "onInitialise": function(status) {
-                var consentGranted = this.hasConsented();
-                
-                // Update Google Consent Mode v2 on page load
-                if (window.updateGoogleConsent) {
-                    window.updateGoogleConsent(consentGranted);
-                }
-                
-                // Legacy support
-                if (consentGranted && window.loadGoogleAnalytics) {
-                    window.loadGoogleAnalytics();
-                }
-                
-                console.log('Cookie consent initialized:', consentGranted ? 'granted' : 'denied');
-            },
-            "onNoCookieLaw": function(countryCode, country) {
-                // For non-EU users, grant consent by default but still show banner
-                if (window.updateGoogleConsent) {
-                    window.updateGoogleConsent(true);
-                }
-            }
-        });
+      window.cookieconsent.initialise({
+        palette: {
+          popup: {
+            background: "#1d2c4d",
+            text: "#ffffff",
+          },
+          button: {
+            background: "#f1d600",
+            text: "#000000",
+          },
+        },
+        theme: "classic",
+        position: "bottom-right",
+        type: "opt-in", // Changed to opt-in for 2024 compliance
+        content: {
+          message:
+            "We use cookies to improve your experience and analyze site usage. This includes analytics cookies that help us understand how you interact with our recipes.",
+          dismiss: "Accept All Cookies",
+          deny: "Decline Analytics",
+          link: "Privacy Policy",
+          href: "/privacy", // You should create this page
+        },
+        law: {
+          regionalLaw: true,
+          countryCode: "EU", // Enables stricter EU/GDPR compliance
+        },
+        onStatusChange: function (status, chosenBefore) {
+          var consentGranted = this.hasConsented();
 
-        // Enhanced consent management functions
-        window.revokeConsent = function() {
-            window.cookieconsent.revokeChoice();
-            if (window.updateGoogleConsent) {
-                window.updateGoogleConsent(false);
-            }
-        };
+          // Update Google Consent Mode v2
+          if (window.updateGoogleConsent) {
+            window.updateGoogleConsent(consentGranted);
+          }
 
-        window.grantConsent = function() {
-            window.cookieconsent.setStatus(window.cookieconsent.status.allow);
-            if (window.updateGoogleConsent) {
-                window.updateGoogleConsent(true);
-            }
-        };
+          // Legacy support for loadGoogleAnalytics function
+          if (consentGranted && window.loadGoogleAnalytics) {
+            window.loadGoogleAnalytics();
+          }
+
+          // Log consent change for debugging
+          console.log("Cookie consent status changed:", consentGranted ? "granted" : "denied");
+        },
+        onInitialise: function (status) {
+          var consentGranted = this.hasConsented();
+
+          // Update Google Consent Mode v2 on page load
+          if (window.updateGoogleConsent) {
+            window.updateGoogleConsent(consentGranted);
+          }
+
+          // Legacy support
+          if (consentGranted && window.loadGoogleAnalytics) {
+            window.loadGoogleAnalytics();
+          }
+
+          console.log("Cookie consent initialized:", consentGranted ? "granted" : "denied");
+        },
+        onNoCookieLaw: function (countryCode, country) {
+          // For non-EU users, grant consent by default but still show banner
+          if (window.updateGoogleConsent) {
+            window.updateGoogleConsent(true);
+          }
+        },
+      });
+
+      // Enhanced consent management functions
+      window.revokeConsent = function () {
+        window.cookieconsent.revokeChoice();
+        if (window.updateGoogleConsent) {
+          window.updateGoogleConsent(false);
+        }
+      };
+
+      window.grantConsent = function () {
+        window.cookieconsent.setStatus(window.cookieconsent.status.allow);
+        if (window.updateGoogleConsent) {
+          window.updateGoogleConsent(true);
+        }
+      };
     </script>
-</body>
-
+  </body>
 </html>

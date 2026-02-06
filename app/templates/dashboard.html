@@ -1,56 +1,62 @@
-{% extends "layout.html" %}
-
-{% block title %}Dashboard | Recipe Hub{% endblock %}
-
-{% block head %}
+{% extends "layout.html" %} {% block title %}Dashboard | Recipe Hub{% endblock %} {% block head %}
 {{ super() }}
 <style>
   /* Custom styles for dashboard */
   .recipe-item {
     border-radius: 10px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease, height 0.5s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      opacity 0.5s ease,
+      height 0.5s ease;
   }
-  
+
   .recipe-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
-  
+
   .ingredient-item {
     transition: all 0.3s ease;
   }
-  
+
   .ingredient-item.selected {
     background-color: #ffc107 !important;
     transform: translateY(-3px);
   }
-  
+
   /* Favorite button styles */
   .favorite-btn {
     transition: all 0.3s ease;
     z-index: 10;
   }
-  
+
   .favorite-btn:hover {
     transform: scale(1.1);
   }
-  
+
   .btn-pulse {
     animation: pulse 0.3s ease-in-out;
   }
-  
+
   @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
-  
+
   /* Toast notifications */
   .toast-container {
     z-index: 1100;
   }
-  
+
   /* Filter button styles */
   .filter-btn.active {
     background-color: #dc3545;
@@ -58,16 +64,16 @@
     color: white;
   }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container py-4 py-lg-5">
   <!-- Combined Welcome Card with Stats -->
   <section class="welcome-section py-4 py-lg-5">
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-8 mb-5 mb-lg-0" data-aos="fade-right">
-          <h1 class="display-5 fw-bold mb-3">Welcome back, {{ current_user.first_name or 'Chef' }}!</h1>
+          <h1 class="display-5 fw-bold mb-3">
+            Welcome back, {{ current_user.first_name or 'Chef' }}!
+          </h1>
           <p class="lead text-muted mb-4">Let's get inspired and cook something amazing today.</p>
           <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
             <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 w-50">
@@ -84,13 +90,19 @@
               <div class="text-muted">Ingredients</div>
             </div>
             <div class="stat-item">
-              <div class="h3 mb-0 text-warning" id="favorites-count">{{ favorites_count if favorites_count is defined else 0 }}</div>
+              <div class="h3 mb-0 text-warning" id="favorites-count">
+                {{ favorites_count if favorites_count is defined else 0 }}
+              </div>
               <div class="text-muted">Favorites</div>
             </div>
           </div>
           <div class="mt-3">
-            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center w-50"
-              id="show-favs-btn" style="gap: 0.25rem;">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center w-50"
+              id="show-favs-btn"
+              style="gap: 0.25rem"
+            >
               <i class="far fa-bookmark me-1"></i>
               <span>Show Favorites</span>
             </button>
@@ -101,7 +113,10 @@
             <div class="card-body p-4">
               <h3 class="h5 mb-3">Quick Actions</h3>
               <div class="list-group list-group-flush">
-                <a href="{{ url_for('upload') }}" class="list-group-item border-0 px-0 py-3 text-decoration-none">
+                <a
+                  href="{{ url_for('upload') }}"
+                  class="list-group-item border-0 px-0 py-3 text-decoration-none"
+                >
                   <div class="d-flex align-items-center">
                     <div class="icon-wrapper-sm bg-soft-primary text-primary rounded-circle me-3">
                       <i class="fas fa-cloud-upload-alt"></i>
@@ -112,7 +127,10 @@
                     </div>
                   </div>
                 </a>
-                <a href="#ingredients-section" class="list-group-item border-0 px-0 py-3 text-decoration-none">
+                <a
+                  href="#ingredients-section"
+                  class="list-group-item border-0 px-0 py-3 text-decoration-none"
+                >
                   <div class="d-flex align-items-center">
                     <div class="icon-wrapper-sm bg-soft-success text-success rounded-circle me-3">
                       <i class="fas fa-carrot"></i>
@@ -123,7 +141,10 @@
                     </div>
                   </div>
                 </a>
-                <a href="#recipes-section" class="list-group-item border-0 px-0 py-3 text-decoration-none">
+                <a
+                  href="#recipes-section"
+                  class="list-group-item border-0 px-0 py-3 text-decoration-none"
+                >
                   <div class="d-flex align-items-center">
                     <div class="icon-wrapper-sm bg-soft-info text-info rounded-circle me-3">
                       <i class="fas fa-book-open"></i>
@@ -161,8 +182,13 @@
             <div class="ingredients-grid">
               {% for product in products %}
               <div class="ingredient-item">
-                <input type="checkbox" name="product" value="{{ product }}" id="product-{{ loop.index }}"
-                  class="ingredient-checkbox">
+                <input
+                  type="checkbox"
+                  name="product"
+                  value="{{ product }}"
+                  id="product-{{ loop.index }}"
+                  class="ingredient-checkbox"
+                />
                 <label for="product-{{ loop.index }}" class="ingredient-label">
                   <span class="ingredient-name">{{ product }}</span>
                 </label>
@@ -198,20 +224,33 @@
         <div class="card-body p-4">
           <ul class="recipe-list">
             {% for recipe in recipes %}
-            <li class="recipe-item position-relative" data-aos="fade-right" data-aos-anchor-placement="top-bottom" data-aos-delay="{{ loop.index0 * 100 }}">
-              <button class="btn btn-sm {% if recipe.is_favorite %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} favorite-btn position-absolute top-0 end-0 m-3" 
-                      data-spoonacular-id="{{ recipe.spoonacular_id or recipe.id or '' }}" 
-                      data-recipe-title="{{ recipe.title or 'Untitled Recipe' }}"
-                      data-recipe-image="{{ recipe.image or url_for('static', filename='images/default_recipe.png') }}"
-                      data-is-favorite="{{ recipe.is_favorite|default(False)|lower }}"
-                      tabindex="-1">
-                <i class="{% if recipe.is_favorite %}fas text-danger{% else %}far{% endif %} fa-bookmark"></i>
+            <li
+              class="recipe-item position-relative"
+              data-aos="fade-right"
+              data-aos-anchor-placement="top-bottom"
+              data-aos-delay="{{ loop.index0 * 100 }}"
+            >
+              <button
+                class="btn btn-sm {% if recipe.is_favorite %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} favorite-btn position-absolute top-0 end-0 m-3"
+                data-spoonacular-id="{{ recipe.spoonacular_id or recipe.id or '' }}"
+                data-recipe-title="{{ recipe.title or 'Untitled Recipe' }}"
+                data-recipe-image="{{ recipe.image or url_for('static', filename='images/default_recipe.png') }}"
+                data-is-favorite="{{ recipe.is_favorite|default(False)|lower }}"
+                tabindex="-1"
+              >
+                <i
+                  class="{% if recipe.is_favorite %}fas text-danger{% else %}far{% endif %} fa-bookmark"
+                ></i>
               </button>
               <div class="row g-0 align-items-center">
                 <div class="col-md-3">
                   <div class="recipe-image">
                     {% if recipe.image %}
-                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded">
+                    <img
+                      src="{{ recipe.image }}"
+                      alt="{{ recipe.title }}"
+                      class="img-fluid rounded"
+                    />
                     {% else %}
                     <i class="fas fa-utensils recipe-icon"></i>
                     {% endif %}
@@ -221,30 +260,43 @@
                   <div class="recipe-content ps-md-4">
                     <h5 class="mb-1 fw-bold">{{ recipe.title }}</h5>
                     <div class="d-flex align-items-center mt-2 mb-2">
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-clock me-1"></i> {{
-                        recipe.readyInMinutes|default(30) }} min</span>
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-star me-1"></i> {{
-                        recipe.difficulty|default('Easy') }}</span>
+                      <span class="badge bg-light text-dark me-2"
+                        ><i class="fas fa-clock me-1"></i> {{ recipe.readyInMinutes|default(30) }}
+                        min</span
+                      >
+                      <span class="badge bg-light text-dark me-2"
+                        ><i class="fas fa-star me-1"></i> {{ recipe.difficulty|default('Easy')
+                        }}</span
+                      >
                       {% if recipe.servings %}
-                      <span class="badge bg-light text-dark me-2"><i class="fas fa-users me-1"></i> {{ recipe.servings
-                        }} servings</span>
+                      <span class="badge bg-light text-dark me-2"
+                        ><i class="fas fa-users me-1"></i> {{ recipe.servings }} servings</span
+                      >
                       {% endif %}
                     </div>
                     <div class="d-flex align-items-center">
                       {% if not recipe.legacy %}
                       <div class="recipe-details mt-2 me-2">
-                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#recipe-{{ loop.index }}" aria-expanded="false">
+                        <button
+                          class="btn btn-sm btn-outline-primary"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#recipe-{{ loop.index }}"
+                          aria-expanded="false"
+                        >
                           <i class="fas fa-info-circle me-1"></i>View Details
                         </button>
                         {% if recipe.sourceUrl %}
-                        <a href="{{ recipe.sourceUrl }}" target="_blank" class="btn btn-sm btn-outline-success ms-2">
+                        <a
+                          href="{{ recipe.sourceUrl }}"
+                          target="_blank"
+                          class="btn btn-sm btn-outline-success ms-2"
+                        >
                           <i class="fas fa-external-link-alt me-1"></i>Source
                         </a>
                         {% endif %}
                       </div>
                       {% endif %}
-
                     </div>
                     <div class="collapse mt-3" id="recipe-{{ loop.index }}">
                       {% if recipe.summary %}
@@ -252,14 +304,12 @@
                         <h6 class="card-subtitle mb-2 text-muted">Summary</h6>
                         <p class="card-text">{{ recipe.summary|safe }}</p>
                       </div>
-                      {% endif %}
-                      {% if recipe.instructions %}
+                      {% endif %} {% if recipe.instructions %}
                       <div class="card card-body mb-3">
                         <h6 class="card-subtitle mb-2 text-muted">Instructions</h6>
                         <p class="card-text">{{ recipe.instructions|safe }}</p>
                       </div>
-                      {% endif %}
-                      {% if recipe.ingredients %}
+                      {% endif %} {% if recipe.ingredients %}
                       <div class="card card-body mb-3">
                         <h6 class="card-subtitle mb-2 text-muted">Ingredients</h6>
                         <p class="card-text">{{ recipe.ingredients|safe }}</p>
@@ -269,17 +319,21 @@
                     <div class="row mt-3">
                       {% if recipe.usedIngredients %}
                       <div class="col-md-6">
-                        <h6><i class="fas fa-check-circle text-success me-1"></i>Ingredients You Have</h6>
+                        <h6>
+                          <i class="fas fa-check-circle text-success me-1"></i>Ingredients You Have
+                        </h6>
                         <ul class="ingredient-list">
                           {% for ingredient in recipe.usedIngredients %}
                           <li>{{ ingredient.original }}</li>
                           {% endfor %}
                         </ul>
                       </div>
-                      {% endif %}
-                      {% if recipe.missedIngredients %}
+                      {% endif %} {% if recipe.missedIngredients %}
                       <div class="col-md-6">
-                        <h6><i class="fas fa-shopping-basket text-warning me-1"></i>Additional Ingredients Needed</h6>
+                        <h6>
+                          <i class="fas fa-shopping-basket text-warning me-1"></i>Additional
+                          Ingredients Needed
+                        </h6>
                         <ul class="ingredient-list">
                           {% for ingredient in recipe.missedIngredients %}
                           <li>{{ ingredient.original }}</li>
@@ -306,71 +360,68 @@
   </section>
   {% endif %}
 </div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
+{% endblock %} {% block scripts %} {{ super() }}
 
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     // Initialize AOS with settings that prevent unwanted reverse animations
     AOS.init({
       duration: 800,
-      once: true    // Only animate elements once when they enter the viewport
+      once: true, // Only animate elements once when they enter the viewport
     });
-    const ingredientItems = document.querySelectorAll('.ingredient-item');
+    const ingredientItems = document.querySelectorAll(".ingredient-item");
 
     // Handle checkbox selection with enhanced UI feedback
-    ingredientItems.forEach(item => {
-      const checkbox = item.querySelector('.ingredient-checkbox');
-      const label = item.querySelector('.ingredient-label');
-      
+    ingredientItems.forEach((item) => {
+      const checkbox = item.querySelector(".ingredient-checkbox");
+      const label = item.querySelector(".ingredient-label");
+
       if (checkbox && label) {
         // Handle click on the label
-        label.addEventListener('click', function(event) {
+        label.addEventListener("click", function (event) {
           // Let the native checkbox behavior work
           // No need to prevent default
-          
+
           // Add visual feedback
           if (checkbox.checked) {
             // Selected state
-            label.classList.add('btn-success');
-            
+            label.classList.add("btn-success");
+
             // Add a subtle animation
-            label.style.transform = 'scale(1.05)';
+            label.style.transform = "scale(1.05)";
             setTimeout(() => {
-              label.style.transform = 'translateY(-2px) scale(1.02)';
+              label.style.transform = "translateY(-2px) scale(1.02)";
             }, 150);
           } else {
             // Deselected state
-            label.classList.remove('btn-success');
-            
+            label.classList.remove("btn-success");
+
             // Reset the style
-            label.style.transform = 'scale(0.95)';
+            label.style.transform = "scale(0.95)";
             setTimeout(() => {
-              label.style.transform = '';
+              label.style.transform = "";
             }, 150);
           }
         });
-        
+
         // Also add a direct event handler to the checkbox
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener("change", function () {
           if (this.checked) {
-            label.classList.add('btn-success');
-            
+            label.classList.add("btn-success");
+
             // Add a subtle animation
-            label.style.transform = 'scale(1.05)';
+            label.style.transform = "scale(1.05)";
             setTimeout(() => {
-              label.style.transform = 'translateY(-2px) scale(1.02)';
+              label.style.transform = "translateY(-2px) scale(1.02)";
             }, 150);
           } else {
-            label.classList.remove('btn-success');
-            
+            label.classList.remove("btn-success");
+
             // Reset the style
-            label.style.transform = 'scale(0.95)';
+            label.style.transform = "scale(0.95)";
             setTimeout(() => {
-              label.style.transform = '';
+              label.style.transform = "";
             }, 150);
           }
         });
@@ -378,23 +429,23 @@
     });
 
     // Add animation to the submit button
-    const submitBtn = document.getElementById('submit');
+    const submitBtn = document.getElementById("submit");
     if (submitBtn) {
-      submitBtn.addEventListener('mouseenter', function () {
-        const icon = this.querySelector('i');
+      submitBtn.addEventListener("mouseenter", function () {
+        const icon = this.querySelector("i");
         if (icon) {
-          icon.style.transform = 'translateY(-3px) scale(1.2)';
+          icon.style.transform = "translateY(-3px) scale(1.2)";
         }
       });
 
-      submitBtn.addEventListener('mouseleave', function () {
-        const icon = this.querySelector('i');
+      submitBtn.addEventListener("mouseleave", function () {
+        const icon = this.querySelector("i");
         if (icon) {
-          icon.style.transform = '';
+          icon.style.transform = "";
         }
       });
     }
-    
+
     // Handle favorite button clicks
     /**
      * Manages the favorite recipe functionality. This includes:
@@ -403,154 +454,163 @@
      * 3. Updating the favorite count in the dashboard stats
      * 4. Handling visibility in favorites view
      */
-    const favoriteButtons = document.querySelectorAll('.favorite-btn');
-    favoriteButtons.forEach(btn => {
-      btn.addEventListener('click', function(event) {
+    const favoriteButtons = document.querySelectorAll(".favorite-btn");
+    favoriteButtons.forEach((btn) => {
+      btn.addEventListener("click", function (event) {
         // Prevent any default action or event bubbling
         event.preventDefault();
         event.stopPropagation();
-        
+
         // Get recipe data from button attributes
-        const spoonacularId = this.getAttribute('data-spoonacular-id');
-        const recipeTitle = this.getAttribute('data-recipe-title');
-        const recipeImage = this.getAttribute('data-recipe-image'); // spoonacular_id is the only identifier used
+        const spoonacularId = this.getAttribute("data-spoonacular-id");
+        const recipeTitle = this.getAttribute("data-recipe-title");
+        const recipeImage = this.getAttribute("data-recipe-image"); // spoonacular_id is the only identifier used
 
         // Defensive check: do not proceed if any value is missing
         if (!spoonacularId || !recipeTitle || !recipeImage) {
-          console.error('Favorite toggle missing data:', {spoonacularId, recipeTitle, recipeImage});
-          showToast('Missing recipe data for favorite action', 'error');
+          console.error("Favorite toggle missing data:", {
+            spoonacularId,
+            recipeTitle,
+            recipeImage,
+          });
+          showToast("Missing recipe data for favorite action", "error");
           return;
         }
         // Debug log for all outgoing favorite requests
-        console.log('Favorite toggle:', {spoonacularId, recipeTitle, recipeImage});
-        
+        console.log("Favorite toggle:", { spoonacularId, recipeTitle, recipeImage });
+
         // Add a visual feedback for the click
-        this.classList.add('btn-pulse');
-        setTimeout(() => this.classList.remove('btn-pulse'), 300);
-        
+        this.classList.add("btn-pulse");
+        setTimeout(() => this.classList.remove("btn-pulse"), 300);
+
         // Send the request to server
-        fetch('/toggle-favorite', {
-          method: 'POST',
+        fetch("/toggle-favorite", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
+            "X-CSRFToken": document
+              .querySelector('meta[name="csrf-token"]')
+              .getAttribute("content"),
           },
           body: JSON.stringify({
             spoonacular_id: spoonacularId,
             recipe_data: {
               id: spoonacularId,
               title: recipeTitle,
-              image: recipeImage
+              image: recipeImage,
+            },
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              // Get the icon within this button
+              const icon = this.querySelector("i");
+
+              // Update the UI based on the new favorite status
+              if (data.action === "added") {
+                // Mark as favorite - visual changes
+                icon.classList.remove("far");
+                icon.classList.add("fas", "text-danger");
+                this.setAttribute("data-is-favorite", "true");
+                this.classList.remove("btn-outline-secondary");
+                this.classList.add("btn-outline-danger");
+
+                // Optional: Show toast notification
+                showToast("Added to favorites!", "success");
+              } else {
+                // Unmark as favorite - visual changes
+                icon.classList.remove("fas", "text-danger");
+                icon.classList.add("far");
+                this.setAttribute("data-is-favorite", "false");
+                this.classList.remove("btn-outline-danger");
+                this.classList.add("btn-outline-secondary");
+
+                // Optional: Show toast notification
+                showToast("Removed from favorites", "info");
+              }
+
+              // Update favorites count in the stats
+              const favoritesCount = document.getElementById("favorites-count");
+              if (favoritesCount) {
+                favoritesCount.textContent = data.favorites_count;
+              }
+
+              // If in favorites view and we removed a favorite, hide the recipe card
+              const isInFavoritesView = window.location.pathname === "/favorites";
+              if (isInFavoritesView && data.action === "removed") {
+                // Hide the removed recipe with animation
+                const recipeItem = this.closest(".recipe-item");
+                recipeItem.style.transition = "opacity 0.5s, height 0.5s";
+                recipeItem.style.opacity = "0";
+
+                // After fade out, collapse the height and then hide completely
+                setTimeout(() => {
+                  recipeItem.style.height = "0";
+                  recipeItem.style.marginBottom = "0";
+                  recipeItem.style.overflow = "hidden";
+
+                  setTimeout(() => {
+                    recipeItem.style.display = "none";
+                  }, 500); // Wait for height animation to finish
+                }, 500); // Wait for opacity animation to finish
+              }
+
+              // Update all buttons for the same recipe (if multiple instances exist)
+              if (spoonacularId) {
+                document
+                  .querySelectorAll(`.favorite-btn[data-spoonacular-id="${spoonacularId}"]`)
+                  .forEach((otherBtn) => {
+                    if (otherBtn !== this) {
+                      const otherIcon = otherBtn.querySelector("i");
+                      if (data.action === "added") {
+                        otherBtn.setAttribute("data-is-favorite", "true");
+                        otherIcon.classList.remove("far");
+                        otherIcon.classList.add("fas", "text-danger");
+                        otherBtn.classList.remove("btn-outline-secondary");
+                        otherBtn.classList.add("btn-outline-danger");
+                      } else {
+                        otherBtn.setAttribute("data-is-favorite", "false");
+                        otherIcon.classList.remove("fas", "text-danger");
+                        otherIcon.classList.add("far");
+                        otherBtn.classList.remove("btn-outline-danger");
+                        otherBtn.classList.add("btn-outline-secondary");
+                      }
+                    }
+                  });
+              }
             }
           })
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            // Get the icon within this button
-            const icon = this.querySelector('i');
-            
-            // Update the UI based on the new favorite status
-            if (data.action === 'added') {
-              // Mark as favorite - visual changes
-              icon.classList.remove('far');
-              icon.classList.add('fas', 'text-danger');
-              this.setAttribute('data-is-favorite', 'true');
-              this.classList.remove('btn-outline-secondary');
-              this.classList.add('btn-outline-danger');
-              
-              // Optional: Show toast notification
-              showToast('Added to favorites!', 'success');
-            } else {
-              // Unmark as favorite - visual changes
-              icon.classList.remove('fas', 'text-danger');
-              icon.classList.add('far');
-              this.setAttribute('data-is-favorite', 'false');
-              this.classList.remove('btn-outline-danger');
-              this.classList.add('btn-outline-secondary');
-              
-              // Optional: Show toast notification
-              showToast('Removed from favorites', 'info');
-            }
-            
-            // Update favorites count in the stats
-            const favoritesCount = document.getElementById('favorites-count');
-            if (favoritesCount) {
-              favoritesCount.textContent = data.favorites_count;
-            }
-            
-            // If in favorites view and we removed a favorite, hide the recipe card
-            const isInFavoritesView = window.location.pathname === '/favorites';
-            if (isInFavoritesView && data.action === 'removed') {
-              // Hide the removed recipe with animation
-              const recipeItem = this.closest('.recipe-item');
-              recipeItem.style.transition = 'opacity 0.5s, height 0.5s';
-              recipeItem.style.opacity = '0';
-              
-              // After fade out, collapse the height and then hide completely
-              setTimeout(() => {
-                recipeItem.style.height = '0';
-                recipeItem.style.marginBottom = '0';
-                recipeItem.style.overflow = 'hidden';
-                
-                setTimeout(() => {
-                  recipeItem.style.display = 'none';
-                }, 500); // Wait for height animation to finish
-              }, 500); // Wait for opacity animation to finish
-            }
-            
-            // Update all buttons for the same recipe (if multiple instances exist)
-            if (spoonacularId) {
-              document.querySelectorAll(`.favorite-btn[data-spoonacular-id="${spoonacularId}"]`).forEach(otherBtn => {
-                if (otherBtn !== this) {
-                  const otherIcon = otherBtn.querySelector('i');
-                  if (data.action === 'added') {
-                    otherBtn.setAttribute('data-is-favorite', 'true');
-                    otherIcon.classList.remove('far');
-                    otherIcon.classList.add('fas', 'text-danger');
-                    otherBtn.classList.remove('btn-outline-secondary');
-                    otherBtn.classList.add('btn-outline-danger');
-                  } else {
-                    otherBtn.setAttribute('data-is-favorite', 'false');
-                    otherIcon.classList.remove('fas', 'text-danger');
-                    otherIcon.classList.add('far');
-                    otherBtn.classList.remove('btn-outline-danger');
-                    otherBtn.classList.add('btn-outline-secondary');
-                  }
-                }
-              });
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Error toggling favorite:', error);
-          showToast('Failed to update favorite status', 'error');
-        });
+          .catch((error) => {
+            console.error("Error toggling favorite:", error);
+            showToast("Failed to update favorite status", "error");
+          });
       });
     });
-    
+
     /**
      * Helper function to show toast notifications
      * @param {string} message - The message to display
      * @param {string} type - The type of toast (success, error, info, warning)
      */
-    function showToast(message, type = 'info') {
+    function showToast(message, type = "info") {
       // Check if we have a toast container, create one if not
-      let toastContainer = document.querySelector('.toast-container');
+      let toastContainer = document.querySelector(".toast-container");
       if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        toastContainer = document.createElement("div");
+        toastContainer.className = "toast-container position-fixed bottom-0 end-0 p-3";
         document.body.appendChild(toastContainer);
       }
-      
+
       // Create a new toast
-      const toastId = 'toast-' + Date.now();
+      const toastId = "toast-" + Date.now();
       const toastHtml = `
-        <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type}" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="${toastId}" class="toast align-items-center text-white bg-${type === "error" ? "danger" : type}" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="d-flex">
             <div class="toast-body">
               ${message}
@@ -559,155 +619,159 @@
           </div>
         </div>
       `;
-      
+
       // Add the toast to the container
-      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-      
+      toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
       // Initialize and show the toast
       const toastElement = document.getElementById(toastId);
       const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
       toast.show();
-      
+
       // Remove the toast element after it's hidden
-      toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.addEventListener("hidden.bs.toast", function () {
         this.remove();
       });
     }
-       // Initialize favorite buttons with correct appearance
-    favoriteButtons.forEach(btn => {
-      if (btn.getAttribute('data-is-favorite') === 'true') {
-        btn.classList.remove('btn-outline-secondary');
-        btn.classList.add('btn-outline-danger');
-        const icon = btn.querySelector('i');
+    // Initialize favorite buttons with correct appearance
+    favoriteButtons.forEach((btn) => {
+      if (btn.getAttribute("data-is-favorite") === "true") {
+        btn.classList.remove("btn-outline-secondary");
+        btn.classList.add("btn-outline-danger");
+        const icon = btn.querySelector("i");
         if (icon) {
-          icon.classList.remove('far');
-          icon.classList.add('fas', 'text-danger');
+          icon.classList.remove("far");
+          icon.classList.add("fas", "text-danger");
         }
       }
     });
-    
+
     /**
      * Handle the "Show Favorites" button functionality
      */
-    const showFavoritesBtn = document.getElementById('show-favs-btn');
+    const showFavoritesBtn = document.getElementById("show-favs-btn");
     if (showFavoritesBtn) {
       // Add click event listener to toggle favorites view
-      showFavoritesBtn.addEventListener('click', function() {
+      showFavoritesBtn.addEventListener("click", function () {
         // Scroll to the recipes section with smooth animation
-        const recipeSection = document.getElementById('recipes-section');
+        const recipeSection = document.getElementById("recipes-section");
         if (recipeSection) {
-          recipeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          recipeSection.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-        
+
         // Check if currently showing favorites or all recipes
-        const isShowingFavorites = this.classList.contains('active');
-        const recipeItems = document.querySelectorAll('.recipe-item');
-        
+        const isShowingFavorites = this.classList.contains("active");
+        const recipeItems = document.querySelectorAll(".recipe-item");
+
         if (!isShowingFavorites) {
           // Switch to showing only favorites
-          this.classList.add('active', 'btn-danger');
-          this.classList.remove('btn-outline-secondary');
-          
+          this.classList.add("active", "btn-danger");
+          this.classList.remove("btn-outline-secondary");
+
           // Update button text
           this.innerHTML = '<i class="fas fa-bookmark me-1"></i><span>Show All Recipes</span>';
-          
+
           // Hide non-favorites with fade animation
-          recipeItems.forEach(item => {
-            const favoriteBtn = item.querySelector('.favorite-btn');
-            const isFavorite = favoriteBtn && favoriteBtn.getAttribute('data-is-favorite') === 'true';
-            
+          recipeItems.forEach((item) => {
+            const favoriteBtn = item.querySelector(".favorite-btn");
+            const isFavorite =
+              favoriteBtn && favoriteBtn.getAttribute("data-is-favorite") === "true";
+
             if (!isFavorite) {
               // Fade out then hide
-              item.style.transition = 'opacity 0.3s ease';
-              item.style.opacity = '0';
+              item.style.transition = "opacity 0.3s ease";
+              item.style.opacity = "0";
               setTimeout(() => {
-                item.style.display = 'none';
+                item.style.display = "none";
               }, 300);
             }
           });
-          
+
           // After hiding non-favorites, fix animation on visible favorites
           setTimeout(() => {
             // Find all visible favorite items
-            const visibleItems = Array.from(recipeItems).filter(item => 
-              item.style.display !== 'none'
+            const visibleItems = Array.from(recipeItems).filter(
+              (item) => item.style.display !== "none"
             );
-            
+
             if (visibleItems.length > 0) {
               // Fix common issue with last item not animating
               const lastItem = visibleItems[visibleItems.length - 1];
-              
+
               // Apply class directly to ensure animation
-              lastItem.classList.add('aos-animate');
-              
+              lastItem.classList.add("aos-animate");
+
               // Slightly adjust position to trigger animation refresh if needed
-              lastItem.style.transform = 'translateY(0.1px)';
+              lastItem.style.transform = "translateY(0.1px)";
               setTimeout(() => {
-                lastItem.style.transform = '';
+                lastItem.style.transform = "";
               }, 50);
             }
           }, 350); // After the hide animation completes
-          
+
           // Show feedback toast
-          showToast('Showing only favorite recipes', 'success');
+          showToast("Showing only favorite recipes", "success");
         } else {
           // Switch back to showing all recipes
-          this.classList.remove('active', 'btn-danger');
-          this.classList.add('btn-outline-secondary');
-          
+          this.classList.remove("active", "btn-danger");
+          this.classList.add("btn-outline-secondary");
+
           // Reset button content
           this.innerHTML = '<i class="far fa-bookmark me-1"></i><span>Show Favorites</span>';
-          
+
           // Show all recipes with fade-in animation
-          recipeItems.forEach(item => {
-            if (item.style.display === 'none') {
-              item.style.display = '';
-              item.style.opacity = '0';
+          recipeItems.forEach((item) => {
+            if (item.style.display === "none") {
+              item.style.display = "";
+              item.style.opacity = "0";
               setTimeout(() => {
-                item.style.opacity = '1';
+                item.style.opacity = "1";
               }, 50);
             }
           });
-          
+
           // Show feedback toast
-          showToast('Showing all recipes', 'info');
+          showToast("Showing all recipes", "info");
         }
       });
     }
-    
+
     // Initialize favorites view if on favorites page
-    if (window.location.pathname === '/favorites') {
+    if (window.location.pathname === "/favorites") {
       // Update the favorites button to show we're in favorites mode
       if (showFavoritesBtn) {
-        showFavoritesBtn.classList.add('active', 'btn-danger');
-        showFavoritesBtn.classList.remove('btn-outline-secondary');
-        showFavoritesBtn.innerHTML = '<i class="fas fa-bookmark me-1"></i><span>Show All Recipes</span>';
-        
+        showFavoritesBtn.classList.add("active", "btn-danger");
+        showFavoritesBtn.classList.remove("btn-outline-secondary");
+        showFavoritesBtn.innerHTML =
+          '<i class="fas fa-bookmark me-1"></i><span>Show All Recipes</span>';
+
         // Hide non-favorite recipes with a small delay to ensure DOM is ready
         setTimeout(() => {
           // Get all recipe items and count favorites for positioning
-          const allItems = document.querySelectorAll('.recipe-item');
+          const allItems = document.querySelectorAll(".recipe-item");
           let visibleCount = 0;
-          
+
           // First pass - count and hide non-favorites
-          allItems.forEach(item => {
-            const favoriteBtn = item.querySelector('.favorite-btn');
-            if (favoriteBtn && favoriteBtn.getAttribute('data-is-favorite') !== 'true') {
-              item.style.display = 'none';
+          allItems.forEach((item) => {
+            const favoriteBtn = item.querySelector(".favorite-btn");
+            if (favoriteBtn && favoriteBtn.getAttribute("data-is-favorite") !== "true") {
+              item.style.display = "none";
             } else {
               visibleCount++;
             }
           });
-          
+
           // Second pass - ensure last item has aos-animate class
           if (visibleCount > 0) {
             // Find all visible items
-            const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+            const visibleItems = Array.from(allItems).filter(
+              (item) => item.style.display !== "none"
+            );
             const lastItem = visibleItems[visibleItems.length - 1];
-            
+
             // Force animation on last item
             if (lastItem) {
-              lastItem.classList.add('aos-animate');
+              lastItem.classList.add("aos-animate");
             }
           }
         }, 100);
