@@ -10,7 +10,7 @@ services:
       - .env
     depends_on:
       - db
-    # - migration
+      # - migration
     restart: unless-stopped
 
   # migration:

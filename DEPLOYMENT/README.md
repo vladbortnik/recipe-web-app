@@ -188,7 +188,7 @@ GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
 **File**: `docker-compose.yml`
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -322,6 +322,7 @@ cat backup_20251017.sql | docker exec -i recipe-web-app_db_1 psql -U recipe_user
 ## Troubleshooting
 
 ### Issue: Containers fail to start
+
 ```bash
 # Check logs
 docker-compose logs
@@ -335,6 +336,7 @@ docker-compose up --build
 ```
 
 ### Issue: Database connection errors
+
 ```bash
 # Check database status
 docker exec -it recipe-web-app_db_1 pg_isready -U recipe_user
@@ -346,6 +348,7 @@ docker-compose up -d
 ```
 
 ### Issue: Nginx 502 Bad Gateway
+
 ```bash
 # Check if containers are running
 docker-compose ps
