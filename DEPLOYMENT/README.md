@@ -28,7 +28,7 @@ PostgreSQL Database (db:5432)
 ### **Network Architecture**
 
 - **Frontend Network**: Connects Nginx to web instances
-- **Backend Network**: Connects web instances to database
+- **Backend Network**: Connects web instances to a database
 - **No Direct Database Access**: Database port (5432) not exposed to host
 - **Internal DNS**: Containers communicate via Docker DNS
 
@@ -42,7 +42,7 @@ PostgreSQL Database (db:5432)
 # Update system packages
 sudo apt update && sudo apt upgrade -y
 
-# Install Docker
+# Install Docker (make sure commands are up-to-date)
 sudo apt install docker.io docker-compose -y
 
 # Enable Docker service
@@ -62,11 +62,11 @@ cp .env-example .env
 nano .env  # Edit with production values
 
 # Build and start containers
-docker-compose up --build -d
+docker compose up --build -d
 
 # Verify deployment
-docker-compose ps
-docker-compose logs -f
+docker compose ps
+docker compose logs -f
 ```
 
 ### 3. **Nginx Configuration** (Upstream Server)
@@ -261,10 +261,10 @@ volumes:
 
 ```bash
 # Check running containers
-docker-compose ps
+docker compose ps
 
 # View logs
-docker-compose logs -f web1 web2 web3
+docker compose logs -f web1 web2 web3
 
 # Check database status
 docker exec -it recipe-web-app_db_1 psql -U recipe_user -d recipe_db -c "SELECT version();"
@@ -277,8 +277,8 @@ docker exec -it recipe-web-app_db_1 psql -U recipe_user -d recipe_db -c "SELECT 
 git pull origin main
 
 # Rebuild and restart containers
-docker-compose down
-docker-compose up --build -d
+docker compose down
+docker compose up --build -d
 
 # Run database migrations (if needed)
 docker exec -it recipe-web-app_web1_1 flask db upgrade
@@ -325,14 +325,14 @@ cat backup_20251017.sql | docker exec -i recipe-web-app_db_1 psql -U recipe_user
 
 ```bash
 # Check logs
-docker-compose logs
+docker compose logs
 
 # Verify environment variables
 cat .env
 
 # Rebuild from scratch
-docker-compose down -v
-docker-compose up --build
+docker compose down -v
+docker compose up --build
 ```
 
 ### Issue: Database connection errors
@@ -342,16 +342,16 @@ docker-compose up --build
 docker exec -it recipe-web-app_db_1 pg_isready -U recipe_user
 
 # Reset database
-docker-compose down
+docker compose down
 docker volume rm recipe-web-app_postgres_data
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Issue: Nginx 502 Bad Gateway
 
 ```bash
 # Check if containers are running
-docker-compose ps
+docker compose ps
 
 # Test upstream connectivity
 curl http://localhost:5002
@@ -372,8 +372,8 @@ git log --oneline  # Find commit hash
 git checkout <previous-commit>
 
 # Rebuild containers
-docker-compose down
-docker-compose up --build -d
+docker compose down
+docker compose up --build -d
 ```
 
 ---
@@ -383,7 +383,7 @@ docker-compose up --build -d
 - [ ] Implement Redis for session storage
 - [ ] Add Prometheus + Grafana monitoring
 - [ ] Set up automated backups to S3/Cloud Storage
-- [ ] Implement blue-green deployment strategy
+- [ ] Implement a blue-green deployment strategy
 - [ ] Add rate limiting for API endpoints
 - [ ] Set up log aggregation (ELK stack)
 - [ ] Implement CDN for static assets

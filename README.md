@@ -35,7 +35,7 @@ _An AI-powered web application that transforms ingredient photos into personaliz
 
 ## 🎯 Overview
 
-**Recipe Hub** is a production-grade web application that empowers home chefs to discover recipes based on ingredients they already have. Simply upload photos of your ingredients, and let Azure Computer Vision AI identify them automatically. The app then suggests personalized recipes using the Spoonacular API, eliminating food waste and inspiring culinary creativity.
+**Recipe Hub** is a production-grade web application that empowers home chefs to discover recipes based on ingredients they already have. Upload photos of your ingredients and let Azure Computer Vision AI identify them automatically. The app then suggests personalized recipes using the Spoonacular API, eliminating food waste and inspiring culinary creativity.
 
 Built with scalability, security, and user experience in mind, Recipe Hub features a load-balanced multi-instance architecture, OAuth integration, and comprehensive security hardening.
 
@@ -47,7 +47,7 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 
 - Upload ingredient photos using Azure Computer Vision API
 - Automatic ingredient identification and tagging
-- Smart ingredient management with virtual pantry
+- Smart ingredient management with a virtual pantry
 
 ### 🔍 **Intelligent Recipe Discovery**
 
@@ -66,7 +66,7 @@ Built with scalability, security, and user experience in mind, Recipe Hub featur
 ### 🔐 **Enterprise-Grade Security**
 
 - Password hashing with Bcrypt
-- CSRF protection on all forms
+- CSRF protection in all forms
 - Network segregation with Docker (frontend/backend networks)
 - Environment-based secrets management
 - GDPR-compliant cookie consent
@@ -189,7 +189,7 @@ The application is deployed on a production server with:
 
 - **Frontend Network**: Public-facing web services
 - **Backend Network**: Database access (internal only)
-- **No exposed database ports** to host machine
+- **No exposed database ports** to the host machine
 - Internal DNS resolution between containers
 
 ---
@@ -279,7 +279,7 @@ recipe-web-app/
 3. **Build and run with Docker Compose**
 
    ```bash
-   docker-compose up --build -d
+   docker compose up --build -d
    ```
 
 4. **Access the application**
@@ -290,17 +290,17 @@ recipe-web-app/
 5. **View logs** (optional)
 
    ```bash
-   docker-compose logs -f web1 web2 web3
+   docker compose logs -f web1 web2 web3
    ```
 
 6. **Stop the application**
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 ### **Database Migrations**
 
-Migrations are handled automatically by `entrypoint.sh`. No manual intervention required.
+Migrations are handled automatically by `scripts/entrypoint.sh`. No manual intervention required.
 
 For manual migration management:
 
@@ -370,6 +370,7 @@ _Software Engineer | Frontend (React 19) → Backend (Flask, PostgreSQL) → Inf
 
 ---
 
-_Last updated: December 2025_
+_Last updated: May 2026_
 
+</div>
 </div>
