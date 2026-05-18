@@ -11,7 +11,6 @@ CLAUDE.md
 DEPLOYMENT/nginx.conf/
 WORKFLOW.md
 PLAN.md
-entrypoint.sh
 
 # General
 .DS_Store
