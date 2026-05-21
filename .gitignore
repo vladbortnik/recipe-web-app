@@ -1,14 +1,13 @@
 # PROJECT SPECIFIC
 # google-analytics.html
 migrations/
-my_info/
+_temp/
 /app/static/upload_dir/*
 !/app/static/upload_dir/.gitkeep
 .claude/
 CLAUDE.md
 .qodo/
 .cursor/
-DEPLOYMENT/nginx.conf/
 WORKFLOW.md
 PLAN.md
 

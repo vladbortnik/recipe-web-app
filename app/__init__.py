@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
+from authlib.integrations.flask_client import OAuth
 
 # Load env variables
 load_dotenv()
@@ -14,6 +15,7 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 mail = Mail()
+oauth = OAuth()
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -37,6 +39,14 @@ def create_app():
     mail.init_app(app)
     limiter.init_app(app)
     csrf.init_app(app)
+    oauth.init_app(app)
+    oauth.register(
+        name='google',
+        client_id=app.config['GOOGLE_CLIENT_ID'],
+        client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'},
+    )
 
     @app.context_processor
     def inject_csrf_token():

@@ -23,12 +23,12 @@ class User(db.Model, UserMixin):
     """
     __tablename__ = 'users'
     id: int = db.Column(db.Integer, primary_key=True)
-    email: str = db.Column(db.String(70), unique=True, nullable=False)
+    email: str = db.Column(db.String(254), unique=True, nullable=False)
     password: Optional[str] = db.Column(db.String(256), nullable=True)  # Nullable for OAuth users
     google_id: Optional[str] = db.Column(db.String(100), unique=True, nullable=True)
     auth_provider: str = db.Column(db.String(20), default='local', nullable=False)  # 'local' or 'google'
     is_verified: bool = db.Column(db.Boolean, default=False, nullable=False)
-    verification_token: Optional[str] = db.Column(db.String(100), nullable=True)
+    verification_token: Optional[str] = db.Column(db.String(512), nullable=True)
     token_expiration: Optional[datetime] = db.Column(db.DateTime, nullable=True)
     date_created: datetime = db.Column(db.DateTime, default=db.func.current_timestamp())
 
@@ -92,3 +92,34 @@ class Favorite(db.Model):
 
     user = db.relationship('User', backref=db.backref('favorites', lazy=True))
     recipe = db.relationship('Recipe', backref=db.backref('favorited_by', lazy=True), primaryjoin="Favorite.spoonacular_id==Recipe.spoonacular_id")
+
+
+class UserRecipe(db.Model):
+    """Tracks which recipes a user has discovered via ingredient searches.
+
+    Populated automatically whenever retrieve_recipes_by_ingredients() is called.
+    Acts as a per-user view over the shared global Recipe cache, so the dashboard
+    only shows recipes that belong to the current user.
+
+    Attributes:
+        id: Primary key.
+        user_id: Foreign key to the user who discovered the recipe.
+        spoonacular_id: Foreign key to the recipe in the recipes table.
+        created_at: When the recipe was first discovered by this user.
+    """
+    __tablename__ = 'user_recipes'
+    id             = db.Column(db.Integer, primary_key=True)
+    user_id        = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    spoonacular_id = db.Column(db.String(50), db.ForeignKey('recipes.spoonacular_id'), nullable=False)
+    created_at     = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'spoonacular_id', name='_user_recipe_uc'),
+    )
+
+    user   = db.relationship('User', backref=db.backref('user_recipes', lazy=True))
+    recipe = db.relationship(
+        'Recipe',
+        backref=db.backref('discovered_by', lazy=True),
+        primaryjoin="UserRecipe.spoonacular_id==Recipe.spoonacular_id"
+    )

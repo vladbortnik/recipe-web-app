@@ -179,6 +179,7 @@
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
           <form id="product-form" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="ingredients-grid">
               {% for product in products %}
               <div class="ingredient-item">

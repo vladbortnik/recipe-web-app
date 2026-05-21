@@ -7,7 +7,7 @@ from flask_login import current_user
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from msrest.authentication import CognitiveServicesCredentials
 from . import db
-from .models import ImgSet, Recipe
+from .models import ImgSet, Recipe, UserRecipe
 from flask import url_for, current_app, jsonify, request
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
@@ -90,9 +90,10 @@ def retrieve_recipes_by_ingredients(products: List[str]) -> List[Dict[str, Any]]
     
     # Create Spoonacular API Endpoint
     api_key = os.getenv('SPOONACULAR_API_KEY')
-    headers = {'Content-Type': 'application/json'}
+    # API key in header keeps it out of nginx/Cloudflare access logs (Bug #8)
+    headers = {'Content-Type': 'application/json', 'x-api-key': api_key}
     # Initial endpoint to get recipes based on ingredients
-    endpoint = f'https://api.spoonacular.com/recipes/findByIngredients?ingredients={product_string}&number=5&apiKey={api_key}'
+    endpoint = f'https://api.spoonacular.com/recipes/findByIngredients?ingredients={product_string}&number=5'
     
     response = requests.get(endpoint, headers=headers)
     
@@ -107,7 +108,7 @@ def retrieve_recipes_by_ingredients(products: List[str]) -> List[Dict[str, Any]]
         for recipe_basic in data:
             recipe_id = recipe_basic['id']
             # Get detailed recipe information including instructions
-            info_endpoint = f'https://api.spoonacular.com/recipes/{recipe_id}/information?apiKey={api_key}'
+            info_endpoint = f'https://api.spoonacular.com/recipes/{recipe_id}/information'
             info_response = requests.get(info_endpoint, headers=headers)
             
             if info_response.status_code == 200:
@@ -139,7 +140,22 @@ def retrieve_recipes_by_ingredients(products: List[str]) -> List[Dict[str, Any]]
                 )
                 db.session.add(recipe_entry)
         db.session.commit()
-        
+
+        # Link discovered recipes to the current user (Bug #9 fix).
+        # UserRecipe is the per-user view over the shared Recipe cache.
+        if current_user.is_authenticated:
+            for recipe in enriched_recipes:
+                exists = UserRecipe.query.filter_by(
+                    user_id=current_user.id,
+                    spoonacular_id=str(recipe['id'])
+                ).first()
+                if not exists:
+                    db.session.add(UserRecipe(
+                        user_id=current_user.id,
+                        spoonacular_id=str(recipe['id'])
+                    ))
+            db.session.commit()
+
         return enriched_recipes
     else:
         return [{"title": "Error fetching recipes, please try again later.", "error": True}]
@@ -163,19 +179,24 @@ def fetch_user_products() -> List[str]:
 
     return list(set(products_with_duplicates))
 
-def fetch_all_recipes() -> List[Dict[str, Any]]:
-    """
-    Retrieve all global recipes in the database.
+def fetch_user_recipes() -> List[Dict[str, Any]]:
+    """Return up to 100 recipes discovered by the current user, newest first.
+
+    Scoped to current_user via the user_recipes association table.
+    Replaces the old fetch_all_recipes() global query (Bug #9 fix).
 
     Returns:
-        List[Dict[str, Any]]: A list of all recipe dictionaries in the database.
+        List[Dict[str, Any]]: A list of recipe dicts for the current user.
     """
-    recipe_entries = Recipe.query.all()
-    all_recipes: List[Dict[str, Any]] = []
-    for entry in recipe_entries:
-        if entry.recipe_data:
-            all_recipes.append(entry.recipe_data)
-    return all_recipes
+    rows = (
+        db.session.query(Recipe)
+        .join(UserRecipe, Recipe.spoonacular_id == UserRecipe.spoonacular_id)
+        .filter(UserRecipe.user_id == current_user.id)
+        .order_by(UserRecipe.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    return [r.recipe_data for r in rows if r.recipe_data]
 
 
 # Email verification functions
@@ -194,7 +215,7 @@ def verify_token(token, expiration=86400):  # 24 hours in seconds
             max_age=expiration
         )
         return email
-    except:
+    except Exception:
         return None
 
 def calculate_token_expiry(hours=None):
@@ -242,18 +263,17 @@ def verify_recaptcha(recaptcha_response):
         return False  # Failing closed for security
 
 def send_verification_email(user):
-    """Send verification email to user"""
+    """Send verification email to user. Returns True on success, False on failure."""
     token = generate_verification_token(user.email)
-    
+
     # Store token and expiration time in user record
     user.verification_token = token
     user.token_expiration = calculate_token_expiry()
     db.session.commit()
-    
+
     # Create verification URL
     verify_url = url_for('verify_email', token=token, _external=True)
-    
-    # Create and send email
+
     subject = "Please Verify Your Email Address"
     body = f"""Hello,
 
@@ -268,11 +288,13 @@ If you did not register for this service, please ignore this email.
 Regards,
 Recipe Hub Team
 """
-    
-    msg = Message(subject, recipients=[user.email], body=body)
-    mail.send(msg)
-    
-    return True
+    try:
+        msg = Message(subject, recipients=[user.email], body=body)
+        mail.send(msg)
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Failed to send verification email to {user.email}: {e}")
+        return False
 
 def reset_password(user):
     """

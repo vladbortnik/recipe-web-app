@@ -1,25 +1,26 @@
 import uuid, os
+from urllib.parse import urlparse, urljoin
 from flask import current_app as app
 from flask import request, render_template, redirect, url_for, flash, session, abort, jsonify, Response
 from flask_login import login_user, current_user, logout_user, login_required
-from authlib.integrations.flask_client import OAuth
-from . import db, bcrypt
+from . import db, bcrypt, oauth
 from .forms import LoginForm, SignupForm, UploadImageForm, PasswordResetForm, EmptyForm, ForgotPasswordForm
 from .models import User, ImgSet, Recipe, Favorite
-from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_all_recipes, send_verification_email, verify_token
+from .utils import retrieve_product_labels, retrieve_recipes_by_ingredients, fetch_user_products, fetch_user_recipes, send_verification_email, verify_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-# Initialize OAuth
-oauth = OAuth(app)
-google = oauth.register(
-    name='google',
-    client_id=app.config['GOOGLE_CLIENT_ID'],
-    client_secret=app.config['GOOGLE_CLIENT_SECRET'],
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
-)
+# OAuth client — registered in create_app() via __init__.py
+google = oauth.create_client('google')
+
+
+def _is_safe_url(target: str) -> bool:
+    """Return True only if target is a relative path on the same host.
+
+    Prevents open-redirect attacks via the ?next= parameter (Bug #3).
+    """
+    ref_url  = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 @app.route('/')
 def index() -> 'flask.Response':
@@ -91,29 +92,20 @@ def toggle_favorite() -> 'flask.Response':
     is_favorite = str(spoonacular_id) in favorite_ids
     
     if not is_favorite:
-        # Need to add this recipe as a favorite
-        # Find or create the recipe by spoonacular_id
+        # Recipe must already exist in the DB (put there by a real Spoonacular search).
+        # User-supplied recipe_data is intentionally never stored here (Bug #18 fix).
         recipe_entry = Recipe.query.filter_by(spoonacular_id=spoonacular_id).first()
-        if not recipe_entry and data.get('recipe_data'):
-            new_recipe_data = data.get('recipe_data')
-            recipe_entry = Recipe(
-                spoonacular_id=str(spoonacular_id),
-                recipe_data=new_recipe_data
-            )
-            db.session.add(recipe_entry)
-            db.session.commit()
-        if recipe_entry:
-            fav = Favorite(user_id=current_user.id, spoonacular_id=spoonacular_id)
-            db.session.add(fav)
-            db.session.commit()
-            return jsonify({
-                "success": True,
-                "action": "added",
-                "favorites_count": get_favorites_count(),
-                "spoonacular_id": spoonacular_id
-            })
-        else:
-            return jsonify({"success": False, "message": "Could not add favorite - missing recipe data"}), 400
+        if not recipe_entry:
+            return jsonify({"success": False, "message": "Recipe not found"}), 404
+        fav = Favorite(user_id=current_user.id, spoonacular_id=spoonacular_id)
+        db.session.add(fav)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "action": "added",
+            "favorites_count": get_favorites_count(),
+            "spoonacular_id": spoonacular_id
+        })
     else:
         # Need to remove this as a favorite
         fav = Favorite.query.filter_by(user_id=current_user.id, spoonacular_id=spoonacular_id).first()
@@ -228,7 +220,9 @@ def login() -> 'flask.Response':
         login_user(user, remember=form.remember.data)
         flash('You have been logged in', 'success')
         next_page = request.args.get('next')
-        return redirect(next_page) if next_page else redirect(url_for('index'))
+        if next_page and not _is_safe_url(next_page):
+            next_page = None
+        return redirect(next_page or url_for('index'))
 
     return render_template('login.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
 
@@ -276,14 +270,17 @@ def signup() -> 'flask.Response':
             db.session.commit()
             
             # Send verification email
-            send_verification_email(user)
-            
-            flash('Your account has been created. Please check your email to verify your account.', 'success')
+            if send_verification_email(user):
+                flash('Your account has been created. Please check your email to verify your account.', 'success')
+            else:
+                flash('Account created but we could not send the verification email. '
+                      'Use the "Resend verification email" option on the login page.', 'warning')
             return redirect(url_for('login'))
         
     return render_template('signup.html', form=form, recaptcha_site_key=app.config['RECAPTCHA_SITE_KEY'])
 
 @app.route('/resend-verification/<int:user_id>')
+@limiter.limit("3 per minute")
 def resend_verification(user_id: int) -> 'flask.Response':
     """Resend the email verification link to a user.
     
@@ -305,9 +302,10 @@ def resend_verification(user_id: int) -> 'flask.Response':
         return redirect(url_for('login'))
     
     # Send new verification email
-    send_verification_email(user)
-    
-    flash('A new verification email has been sent to your email address.', 'success')
+    if send_verification_email(user):
+        flash('A new verification email has been sent to your email address.', 'success')
+    else:
+        flash('Failed to send verification email. Please try again later.', 'danger')
     return redirect(url_for('login'))
 
 @app.route('/verify-email/<token>')
@@ -441,7 +439,7 @@ def dashboard() -> 'flask.Response':
             ## CASE 2: Default for "GET /dashboard"
             # Fetch ALL the 'products && recipes' for CURR_USER from DB
             products = fetch_user_products()
-            recipes = fetch_all_recipes()
+            recipes = fetch_user_recipes()
     
     # Get favorite spoonacular IDs
     favorite_spoonacular_ids = get_favorite_spoonacular_ids()
